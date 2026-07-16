@@ -8,11 +8,10 @@ using System.Web.UI;
 namespace PACE
 {
     // Code-behind for the student per-class task page.
-    // Shows all tasks for a specific class the student is enrolled in,
-    // read from the ClassID query string parameter.
+    // Loads all tasks for the class the student is enrolled in.
+    // Sidebar includes pending and overdue counts per class for badge colouring.
     public partial class StudentClassPage : Page
     {
-        // Stores the current class ID so the sidebar helper can highlight the active link
         private int _currentClassID = 0;
 
         // - Page lifecycle -
@@ -24,7 +23,6 @@ namespace PACE
 
             int studentID = Convert.ToInt32(Session["UserID"]);
 
-            // Read ClassID from the URL (e.g. StudentClassPage.aspx?ClassID=1)
             int classID = 0;
             if (!int.TryParse(Request.QueryString["ClassID"], out classID) || classID <= 0)
             {
@@ -34,46 +32,77 @@ namespace PACE
 
             _currentClassID = classID;
 
-            // Load the student's enrolled classes for the sidebar
-            List<SchoolClass> classes = SchoolClass.GetClassesByStudent(studentID);
+            // Load sidebar with pending + overdue counts
+            DataTable sidebarDt = LoadSidebarClasses(studentID);
 
-            // Confirm the student is actually enrolled in the requested class
+            // Verify the student is enrolled in the requested class
             bool enrolled = false;
             string className = "";
-            foreach (SchoolClass sc in classes)
+            foreach (DataRow row in sidebarDt.Rows)
             {
-                if (sc.ClassID == classID)
+                if (Convert.ToInt32(row["ClassID"]) == classID)
                 {
                     enrolled = true;
-                    className = sc.ClassName;
+                    className = row["ClassName"].ToString();
                     break;
                 }
             }
 
-            // Redirect if the student is not enrolled (prevents URL-guessing access)
             if (!enrolled)
             {
                 Response.Redirect("~/Pages/Student/StudentDashboard.aspx");
                 return;
             }
 
-            // Bind sidebar after confirming the class exists
-            rptSidebarClasses.DataSource = classes;
+            rptSidebarClasses.DataSource = sidebarDt;
             rptSidebarClasses.DataBind();
 
             if (!IsPostBack)
             {
                 lblHeroTitle.Text = className;
                 lblBreadcrumb.Text = className;
-
                 LoadTasks(classID, studentID);
             }
         }
 
         // - Methods -
 
-        // Loads all tasks for this class with the student's completion status.
-        // Uses the same JOIN pattern as the student dashboard but filtered to one class.
+        // Loads sidebar with pending count and overdue count per class.
+        // OverdueCount drives the orange badge on the sidebar nav items.
+        private DataTable LoadSidebarClasses(int studentID)
+        {
+            string connStr = ConfigurationManager.ConnectionStrings["PACEConnectionString"].ConnectionString;
+            DataTable dt = new DataTable();
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                string sql =
+                    "SELECT c.ClassID, c.ClassName, " +
+                    "COUNT(CASE WHEN ht.TaskID IS NOT NULL AND ISNULL(cr.MarkedComplete, 0) = 0 THEN 1 END) AS PendingCount, " +
+                    "COUNT(CASE WHEN ht.TaskID IS NOT NULL AND ISNULL(cr.MarkedComplete, 0) = 0 " +
+                    "           AND ht.DueDate < CAST(GETDATE() AS DATE) THEN 1 END) AS OverdueCount " +
+                    "FROM Classes c " +
+                    "INNER JOIN ClassEnrolments ce ON c.ClassID = ce.ClassID AND ce.StudentID = @StudentID " +
+                    "LEFT JOIN HomeworkTasks ht ON ht.ClassID = c.ClassID " +
+                    "LEFT JOIN CompletionRecords cr ON cr.TaskID = ht.TaskID AND cr.StudentID = @StudentID " +
+                    "GROUP BY c.ClassID, c.ClassName " +
+                    "ORDER BY c.ClassName";
+
+                using (SqlCommand cmd = new SqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@StudentID", studentID);
+                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    {
+                        da.Fill(dt);
+                    }
+                }
+            }
+
+            return dt;
+        }
+
+        // Loads all tasks for the class with this student's completion status.
         private void LoadTasks(int classID, int studentID)
         {
             string connStr = ConfigurationManager.ConnectionStrings["PACEConnectionString"].ConnectionString;
@@ -82,15 +111,14 @@ namespace PACE
             using (SqlConnection conn = new SqlConnection(connStr))
             {
                 conn.Open();
-
-                string sql = "SELECT ht.TaskID, ht.Title, ht.Description, " +
-                             "ht.DueDate, ht.PriorityLevel, " +
-                             "ISNULL(cr.MarkedComplete, 0) AS MarkedComplete " +
-                             "FROM HomeworkTasks ht " +
-                             "LEFT JOIN CompletionRecords cr ON ht.TaskID = cr.TaskID " +
-                             "  AND cr.StudentID = @StudentID " +
-                             "WHERE ht.ClassID = @ClassID " +
-                             "ORDER BY ht.DueDate ASC, ht.PriorityLevel DESC";
+                string sql =
+                    "SELECT ht.TaskID, ht.Title, ht.Description, " +
+                    "ht.DueDate, ht.PriorityLevel, " +
+                    "ISNULL(cr.MarkedComplete, 0) AS MarkedComplete " +
+                    "FROM HomeworkTasks ht " +
+                    "LEFT JOIN CompletionRecords cr ON ht.TaskID = cr.TaskID AND cr.StudentID = @StudentID " +
+                    "WHERE ht.ClassID = @ClassID " +
+                    "ORDER BY ht.DueDate ASC, ht.PriorityLevel DESC";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -115,13 +143,9 @@ namespace PACE
             Response.Redirect("~/Login.aspx");
         }
 
-        // Returns "nav-item active" for the currently viewed class, "nav-item" for all others.
-        // Called from the sidebar Repeater template using <%# %>.
         protected string GetNavClass(object classIDObj)
         {
-            return Convert.ToInt32(classIDObj) == _currentClassID
-                ? "nav-item active"
-                : "nav-item";
+            return Convert.ToInt32(classIDObj) == _currentClassID ? "nav-item active" : "nav-item";
         }
 
         protected string GetInitials()

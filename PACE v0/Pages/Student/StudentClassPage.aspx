@@ -13,9 +13,11 @@
             --red:#d95c5c; --red-bg:#fdf0f0; --red-border:#f0b8b8;
             --orange:#d4882a; --orange-bg:#fef7ee; --orange-border:#f0d0a0;
             --green:#3a9e6e; --green-bg:#eef8f3; --green-border:#a8d9c0;
-            --sidebar-w:258px; --topbar-h:58px; --shadow:0 2px 8px rgba(74,111,165,0.10);
+            --sidebar-w:258px; --topbar-h:58px; --filterbar-h:52px;
+            --shadow:0 2px 8px rgba(74,111,165,0.10);
         }
         *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+        a { text-decoration:none; }
         html, body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text-dark); font-size:14px; }
 
         .sidebar { position:fixed; left:0; top:0; bottom:0; width:var(--sidebar-w); background:var(--sidebar); display:flex; flex-direction:column; z-index:300; overflow-y:auto; }
@@ -29,6 +31,8 @@
         .nav-item.active { background:rgba(255,255,255,0.18); color:#fff; font-weight:600; }
         .nav-item i { font-size:17px; flex-shrink:0; }
         .nav-item-label { flex:1; }
+        .nav-badge { font-size:11px; font-weight:700; background:rgba(255,255,255,0.22); color:#fff; padding:1px 7px; border-radius:20px; }
+        .nav-badge.overdue { background:rgba(212,136,42,0.85); }
         .sidebar-user { padding:14px 16px; border-top:1px solid rgba(255,255,255,0.12); display:flex; align-items:center; gap:10px; }
         .user-avatar { width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.22); color:#fff; font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .user-info { flex:1; min-width:0; }
@@ -41,11 +45,26 @@
         .main { margin-left:var(--sidebar-w); min-height:100vh; display:flex; flex-direction:column; }
         .topbar { position:sticky; top:0; z-index:200; height:var(--topbar-h); background:var(--topbar); display:flex; align-items:center; padding:0 28px; box-shadow:0 2px 10px rgba(58,90,140,0.18); }
         .breadcrumb { display:flex; align-items:center; gap:6px; font-size:13px; color:rgba(255,255,255,0.65); }
-        .breadcrumb a { color:rgba(255,255,255,0.65); text-decoration:none; }
+        .breadcrumb a { color:rgba(255,255,255,0.65); }
+        .breadcrumb .sep { opacity:0.45; font-size:12px; }
         .breadcrumb .current { color:#fff; font-weight:500; }
         .hero { background:linear-gradient(130deg,var(--hero-dark) 0%,var(--topbar) 100%); padding:30px 28px 28px; }
         .hero-title { font-size:28px; font-weight:700; color:#fff; letter-spacing:-0.5px; }
         .hero-sub { font-size:14px; color:rgba(255,255,255,0.62); margin-top:4px; }
+
+        /* Sticky filter bar */
+        .filter-bar { position:sticky; top:var(--topbar-h); z-index:150; background:var(--white); border-bottom:1px solid var(--border); box-shadow:0 2px 8px rgba(74,111,165,0.08); padding:0 28px; height:var(--filterbar-h); display:flex; align-items:center; gap:10px; }
+        .filter-chips { display:flex; gap:6px; flex:1; }
+        .chip { padding:5px 14px; border-radius:20px; font-size:13px; font-weight:500; cursor:pointer; border:1.5px solid var(--border); color:var(--text-muted); background:#fff; transition:all 0.15s; user-select:none; font-family:'DM Sans',sans-serif; }
+        .chip:hover { border-color:var(--topbar); color:var(--topbar); }
+        .chip.active { background:var(--topbar); border-color:var(--topbar); color:#fff; font-weight:600; }
+        .filter-right { display:flex; align-items:center; gap:8px; }
+        .search-wrap { position:relative; display:flex; align-items:center; }
+        .search-wrap i { position:absolute; left:10px; color:var(--text-muted); font-size:15px; pointer-events:none; }
+        .search-input { padding:6px 12px 6px 32px; border-radius:8px; border:1.5px solid var(--border); background:var(--bg); font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text-dark); width:200px; outline:none; transition:border-color 0.15s; }
+        .search-input:focus { border-color:var(--topbar); background:#fff; }
+        .search-input::placeholder { color:var(--text-muted); }
+        .filter-count { font-size:12.5px; color:var(--text-muted); white-space:nowrap; }
 
         .content { padding:24px 28px 40px; display:flex; flex-direction:column; gap:20px; }
         .card { background:var(--white); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); }
@@ -53,7 +72,6 @@
         .card-header-icon { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .card-header-title { font-size:15px; font-weight:600; flex:1; }
         .card-header-count { font-size:13px; color:var(--text-muted); }
-
         .table-card { overflow:hidden; }
         .task-table { width:100%; border-collapse:collapse; }
         .task-table thead th { padding:11px 14px; text-align:left; font-size:11px; font-weight:600; letter-spacing:0.7px; text-transform:uppercase; color:var(--text-muted); background:var(--bg); border-bottom:1px solid var(--border); }
@@ -68,16 +86,17 @@
         .task-desc { font-size:12px; color:var(--text-muted); margin-top:2px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
         .due-main { font-size:13px; font-weight:500; }
         .due-urgency { font-size:11px; font-weight:500; margin-top:1px; }
-        .due-red { color:var(--red); } .due-orange { color:var(--orange); } .due-green { color:var(--green); } .due-muted { color:var(--text-muted); }
+        .due-red { color:var(--red); } .due-orange { color:var(--orange); } .due-green { color:var(--green); }
         .badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:20px; font-size:11.5px; font-weight:500; border:1px solid; white-space:nowrap; }
-        .badge-high { color:var(--red); background:var(--red-bg); border-color:var(--red-border); }
-        .badge-med  { color:var(--orange); background:var(--orange-bg); border-color:var(--orange-border); }
-        .badge-low  { color:var(--green); background:var(--green-bg); border-color:var(--green-border); }
+        .badge-high     { color:var(--red);    background:var(--red-bg);    border-color:var(--red-border); }
+        .badge-med      { color:var(--orange); background:var(--orange-bg); border-color:var(--orange-border); }
+        .badge-low      { color:var(--green);  background:var(--green-bg);  border-color:var(--green-border); }
         .badge-pending  { color:var(--orange); background:var(--orange-bg); border-color:var(--orange-border); }
-        .badge-complete { color:var(--green); background:var(--green-bg); border-color:var(--green-border); }
+        .badge-complete { color:var(--green);  background:var(--green-bg);  border-color:var(--green-border); }
         .btn-view { display:inline-flex; align-items:center; gap:4px; padding:5px 12px; border-radius:7px; background:var(--topbar); color:#fff; font-size:12px; font-weight:500; text-decoration:none; transition:background 0.15s; }
         .btn-view:hover { background:var(--hero-dark); }
         .btn-view i { font-size:14px; }
+        .no-results { padding:36px 20px; text-align:center; color:var(--text-muted); font-size:13.5px; }
         .empty-state { padding:48px 20px; text-align:center; color:var(--text-muted); }
     </style>
 </head>
@@ -93,12 +112,14 @@
                 <div class="nav-section-label">Main</div>
                 <a class="nav-item" href="StudentDashboard.aspx"><i class="ti ti-layout-dashboard"></i><span class="nav-item-label">My Dashboard</span></a>
                 <div class="nav-section-label">Classes</div>
-                <%-- Active class is highlighted by the code-behind helper --%>
                 <asp:Repeater ID="rptSidebarClasses" runat="server">
                     <ItemTemplate>
                         <a class='<%# GetNavClass(Eval("ClassID")) %>' href='StudentClassPage.aspx?ClassID=<%# Eval("ClassID") %>'>
                             <i class="ti ti-book"></i>
                             <span class="nav-item-label"><%# Eval("ClassName") %></span>
+                            <%# Convert.ToInt32(Eval("PendingCount")) > 0
+                                ? "<span class='nav-badge" + (Convert.ToInt32(Eval("OverdueCount")) > 0 ? " overdue" : "") + "'>" + Eval("PendingCount") + "</span>"
+                                : "" %>
                         </a>
                     </ItemTemplate>
                 </asp:Repeater>
@@ -117,16 +138,33 @@
             <header class="topbar">
                 <div class="breadcrumb">
                     <a href="StudentDashboard.aspx">PACE</a>
-                    <i class="ti ti-chevron-right" style="opacity:0.45;"></i>
+                    <i class="ti ti-chevron-right sep"></i>
                     <a href="StudentDashboard.aspx">My Dashboard</a>
-                    <i class="ti ti-chevron-right" style="opacity:0.45;"></i>
+                    <i class="ti ti-chevron-right sep"></i>
                     <span class="current"><asp:Label ID="lblBreadcrumb" runat="server" /></span>
                 </div>
             </header>
 
             <div class="hero">
                 <div class="hero-title"><asp:Label ID="lblHeroTitle" runat="server" /></div>
-                <div class="hero-sub">All homework tasks assigned to this class, ordered by due date.</div>
+                <div class="hero-sub">All homework tasks for this class, ordered by due date and priority.</div>
+            </div>
+
+            <div class="filter-bar">
+                <div class="filter-chips">
+                    <button type="button" class="chip active" data-filter="all"      onclick="setChip(this)">All Tasks</button>
+                    <button type="button" class="chip"        data-filter="pending"  onclick="setChip(this)">Pending</button>
+                    <button type="button" class="chip"        data-filter="complete" onclick="setChip(this)">Completed</button>
+                    <button type="button" class="chip"        data-filter="high"     onclick="setChip(this)">High Priority</button>
+                    <button type="button" class="chip"        data-filter="overdue"  onclick="setChip(this)">Overdue</button>
+                </div>
+                <div class="filter-right">
+                    <div class="search-wrap">
+                        <i class="ti ti-search"></i>
+                        <input type="text" id="searchInput" class="search-input" placeholder="Search tasks..." oninput="applyFilters()" />
+                    </div>
+                    <span class="filter-count" id="filterCount"></span>
+                </div>
             </div>
 
             <div class="content">
@@ -141,18 +179,17 @@
                         <HeaderTemplate>
                             <table class="task-table">
                                 <thead>
-                                    <tr>
-                                        <th>Task</th>
-                                        <th>Due Date</th>
-                                        <th>Priority</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
+                                    <tr><th>Task</th><th>Due Date</th><th>Priority</th><th>Status</th><th>Action</th></tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="taskTbody">
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <tr>
+                            <tr class="task-row"
+                                data-status='<%# Convert.ToBoolean(Eval("MarkedComplete")) ? "complete" : "pending" %>'
+                                data-priority='<%# Eval("PriorityLevel") %>'
+                                data-title='<%# Eval("Title").ToString().ToLower().Replace("'","") %>'
+                                data-due='<%# Convert.ToDateTime(Eval("DueDate")).ToString("yyyy-MM-dd") %>'
+                                data-overdue='<%# Convert.ToDateTime(Eval("DueDate")).Date < DateTime.Today ? "1" : "0" %>'>
                                 <td>
                                     <div class="task-name"><%# Eval("Title") %></div>
                                     <div class="task-desc"><%# Eval("Description") %></div>
@@ -163,16 +200,13 @@
                                 </td>
                                 <td><%# GetPriorityBadge(Eval("PriorityLevel")) %></td>
                                 <td><%# GetStatusBadge(Eval("MarkedComplete")) %></td>
-                                <td>
-                                    <a class="btn-view" href="TaskDetail.aspx?TaskID=<%# Eval("TaskID") %>">
-                                        <i class="ti ti-eye"></i> View
-                                    </a>
-                                </td>
+                                <td><a class="btn-view" href='TaskDetail.aspx?TaskID=<%# Eval("TaskID") %>'><i class="ti ti-eye"></i> View</a></td>
                             </tr>
                         </ItemTemplate>
                         <FooterTemplate></tbody></table></FooterTemplate>
                     </asp:Repeater>
 
+                    <div id="noResults" class="no-results" style="display:none;">No tasks match your search or filter.</div>
                     <asp:Panel ID="pnlNoTasks" runat="server" Visible="false">
                         <div class="empty-state">No tasks assigned to this class yet.</div>
                     </asp:Panel>
@@ -181,5 +215,44 @@
         </div>
 
     </form>
+
+    <script>
+        var activeFilter = 'all';
+
+        function setChip(el) {
+            document.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('active'); });
+            el.classList.add('active');
+            activeFilter = el.dataset.filter;
+            applyFilters();
+        }
+
+        function applyFilters() {
+            var search = document.getElementById('searchInput').value.toLowerCase();
+            var tbody  = document.getElementById('taskTbody');
+            if (!tbody) return;
+
+            var rows = Array.from(document.querySelectorAll('.task-row'));
+            var visibleCount = 0;
+
+            rows.forEach(function(row) {
+                var show = true;
+                if (activeFilter === 'pending'  && row.dataset.status !== 'pending')  show = false;
+                if (activeFilter === 'complete' && row.dataset.status !== 'complete') show = false;
+                if (activeFilter === 'high'     && row.dataset.priority !== '3')      show = false;
+                if (activeFilter === 'overdue'  && row.dataset.overdue !== '1')       show = false;
+                if (search && !row.dataset.title.includes(search)) show = false;
+                row.style.display = show ? '' : 'none';
+                if (show) visibleCount++;
+            });
+
+            var total = rows.length;
+            document.getElementById('filterCount').textContent = visibleCount === total
+                ? total + ' tasks'
+                : visibleCount + ' of ' + total + ' tasks';
+            document.getElementById('noResults').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        window.addEventListener('load', applyFilters);
+    </script>
 </body>
 </html>

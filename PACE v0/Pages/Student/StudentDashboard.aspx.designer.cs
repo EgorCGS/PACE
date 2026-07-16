@@ -60,6 +60,24 @@ namespace PACE
         protected global::System.Web.UI.WebControls.Label lblPendingCount;
 
         /// <summary>
+        /// pnlUrgent control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlUrgent;
+
+        /// <summary>
+        /// rptUrgent control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptUrgent;
+
+        /// <summary>
         /// lblTaskCount control.
         /// </summary>
         /// <remarks>
@@ -85,5 +103,23 @@ namespace PACE
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel pnlNoTasks;
+
+        /// <summary>
+        /// rptBottomClasses control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptBottomClasses;
+
+        /// <summary>
+        /// rptProgress control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptProgress;
     }
 }

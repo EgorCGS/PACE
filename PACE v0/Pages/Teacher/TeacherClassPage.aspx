@@ -16,9 +16,9 @@
             --sidebar-w:258px; --topbar-h:58px; --shadow:0 2px 8px rgba(74,111,165,0.10);
         }
         *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+        a { text-decoration:none; }
         html, body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text-dark); font-size:14px; }
 
-        /* Sidebar */
         .sidebar { position:fixed; left:0; top:0; bottom:0; width:var(--sidebar-w); background:var(--sidebar); display:flex; flex-direction:column; z-index:300; overflow-y:auto; }
         .sidebar-logo { padding:24px 20px 20px; border-bottom:1px solid rgba(255,255,255,0.12); }
         .logo-title { font-size:22px; font-weight:700; color:#fff; letter-spacing:-0.5px; }
@@ -39,35 +39,32 @@
         .btn-logout:hover { color:#fff; background:rgba(255,255,255,0.12); }
         .btn-logout i { font-size:18px; display:block; }
 
-        /* Main */
         .main { margin-left:var(--sidebar-w); min-height:100vh; display:flex; flex-direction:column; }
         .topbar { position:sticky; top:0; z-index:200; height:var(--topbar-h); background:var(--topbar); display:flex; align-items:center; padding:0 28px; box-shadow:0 2px 10px rgba(58,90,140,0.18); }
         .breadcrumb { display:flex; align-items:center; gap:6px; font-size:13px; color:rgba(255,255,255,0.65); }
-        .breadcrumb a { color:rgba(255,255,255,0.65); text-decoration:none; }
+        .breadcrumb a { color:rgba(255,255,255,0.65); }
+        .breadcrumb .sep { opacity:0.45; font-size:12px; }
         .breadcrumb .current { color:#fff; font-weight:500; }
         .hero { background:linear-gradient(130deg,var(--hero-dark) 0%,var(--topbar) 100%); padding:30px 28px 28px; }
         .hero-title { font-size:28px; font-weight:700; color:#fff; letter-spacing:-0.5px; }
         .hero-sub { font-size:14px; color:rgba(255,255,255,0.62); margin-top:4px; }
 
-        /* Content */
         .content { padding:28px 28px 48px; display:flex; flex-direction:column; gap:28px; }
-
-        /* Summary strip */
         .summary-strip { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
         .summary-card { background:var(--white); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); padding:22px 24px 20px; }
         .summary-number { font-size:36px; font-weight:700; color:var(--topbar); line-height:1; margin-bottom:8px; }
         .summary-label { font-size:12.5px; color:var(--text-muted); font-weight:500; }
-
-        /* Two-column stats grid */
+        .actions-row { display:flex; gap:12px; }
+        .btn-action { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:8px; background:var(--topbar); color:#fff; font-size:13.5px; font-weight:600; font-family:'DM Sans',sans-serif; border:none; cursor:pointer; text-decoration:none; transition:background 0.15s; }
+        .btn-action:hover { background:var(--hero-dark); }
+        .btn-action.secondary { background:var(--white); color:var(--topbar); border:1.5px solid var(--border); }
+        .btn-action.secondary:hover { background:var(--bg); }
+        .btn-action i { font-size:16px; }
         .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-
-        /* Cards */
         .card { background:var(--white); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); }
         .card-header { display:flex; align-items:center; gap:10px; padding:16px 20px 14px; border-bottom:1px solid var(--border); }
         .card-header-icon { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .card-header-title { font-size:15px; font-weight:600; flex:1; }
-
-        /* Tables */
         .stats-table { width:100%; border-collapse:collapse; }
         .stats-table thead th { padding:10px 16px; text-align:left; font-size:11px; font-weight:600; letter-spacing:0.7px; text-transform:uppercase; color:var(--text-muted); background:var(--bg); border-bottom:1px solid var(--border); }
         .stats-table thead th:first-child { padding-left:20px; }
@@ -76,32 +73,19 @@
         .stats-table tbody tr:hover { background:#f7f9fd; }
         .stats-table td { padding:12px 16px; vertical-align:middle; font-size:13.5px; }
         .stats-table td:first-child { padding-left:20px; font-weight:600; }
-
-        /* Progress bars */
         .pct-cell { min-width:150px; }
         .pct-row { display:flex; align-items:center; gap:10px; }
         .pct-label { font-size:12.5px; font-weight:600; color:var(--text-dark); min-width:38px; text-align:right; }
         .pct-track { flex:1; height:7px; border-radius:10px; background:var(--bg); border:1px solid var(--border); overflow:hidden; }
-        .pct-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--sidebar) 0%,var(--topbar) 100%); }
-        .pct-fill.green  { background:linear-gradient(90deg,#2d8a5f 0%,var(--green) 100%); }
-        .pct-fill.orange { background:linear-gradient(90deg,#b86e10 0%,var(--orange) 100%); }
+        .pct-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--sidebar),var(--topbar)); }
+        .pct-fill.green  { background:linear-gradient(90deg,#2d8a5f,var(--green)); }
+        .pct-fill.orange { background:linear-gradient(90deg,#b86e10,var(--orange)); }
         .pct-fill.zero   { background:var(--border); }
-
         .fraction { font-size:12px; color:var(--text-muted); }
-
-        /* Student enrolment table */
         .student-avatar { width:30px; height:30px; border-radius:50%; background:rgba(74,111,165,0.12); color:#3a5a8c; font-size:11.5px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; border:1px solid #b8cde8; margin-right:8px; }
         .student-name-cell { display:flex; align-items:center; }
-
+        .student-behind { color:var(--red); }
         .empty-state { padding:40px 20px; text-align:center; color:var(--text-muted); font-size:13px; }
-
-        /* Quick actions row */
-        .actions-row { display:flex; gap:12px; }
-        .btn-action { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:8px; background:var(--topbar); color:#fff; font-size:13.5px; font-weight:600; font-family:'DM Sans',sans-serif; border:none; cursor:pointer; text-decoration:none; transition:background 0.15s; }
-        .btn-action:hover { background:var(--hero-dark); }
-        .btn-action.secondary { background:var(--white); color:var(--topbar); border:1.5px solid var(--border); }
-        .btn-action.secondary:hover { background:var(--bg); }
-        .btn-action i { font-size:16px; }
     </style>
 </head>
 <body>
@@ -116,8 +100,8 @@
                 <div class="nav-section-label">Overview</div>
                 <a class="nav-item" href="TeacherDashboard.aspx"><i class="ti ti-layout-dashboard"></i><span class="nav-item-label">Dashboard</span></a>
                 <div class="nav-section-label">Tasks</div>
-                <a class="nav-item" href="CreateTask.aspx"><i class="ti ti-plus"></i><span class="nav-item-label">Create Task</span></a>
                 <a class="nav-item" href="ManageTasks.aspx"><i class="ti ti-list"></i><span class="nav-item-label">Manage Tasks</span></a>
+                <a class="nav-item" href="CreateTask.aspx"><i class="ti ti-plus"></i><span class="nav-item-label">Create Task</span></a>
                 <a class="nav-item" href="MarkCompletions.aspx"><i class="ti ti-clipboard-check"></i><span class="nav-item-label">Mark Completions</span></a>
                 <div class="nav-section-label">Classes</div>
                 <asp:Repeater ID="rptSidebarClasses" runat="server">
@@ -143,7 +127,7 @@
             <header class="topbar">
                 <div class="breadcrumb">
                     <a href="TeacherDashboard.aspx">PACE</a>
-                    <i class="ti ti-chevron-right" style="opacity:0.45;"></i>
+                    <i class="ti ti-chevron-right sep"></i>
                     <span class="current"><asp:Label ID="lblBreadcrumb" runat="server" /></span>
                 </div>
             </header>
@@ -155,13 +139,11 @@
 
             <div class="content">
 
-                <%-- Quick action buttons --%>
                 <div class="actions-row">
-                    <a class="btn-action" href='CreateTask.aspx'><i class="ti ti-plus"></i> Create Task</a>
+                    <a class="btn-action" href='CreateTask.aspx?ClassID=<%= Request.QueryString["ClassID"] %>'><i class="ti ti-plus"></i> Create Task</a>
                     <a class="btn-action secondary" href="MarkCompletions.aspx"><i class="ti ti-clipboard-check"></i> Mark Completions</a>
                 </div>
 
-                <%-- Summary numbers --%>
                 <div class="summary-strip">
                     <div class="summary-card">
                         <div class="summary-number"><asp:Label ID="lblTotalStudents" runat="server" /></div>
@@ -177,10 +159,8 @@
                     </div>
                 </div>
 
-                <%-- Task stats and student breakdown side by side --%>
                 <div class="stats-grid">
 
-                    <%-- Left: completion by task --%>
                     <div class="card">
                         <div class="card-header">
                             <div class="card-header-icon" style="background:#e8f0fa;"><i class="ti ti-checklist" style="color:#3a5a8c;font-size:17px;"></i></div>
@@ -189,13 +169,7 @@
                         <asp:Repeater ID="rptTaskStats" runat="server">
                             <HeaderTemplate>
                                 <table class="stats-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Task</th>
-                                            <th>Done</th>
-                                            <th class="pct-cell">Progress</th>
-                                        </tr>
-                                    </thead>
+                                    <thead><tr><th>Task</th><th>Done</th><th class="pct-cell">Progress</th></tr></thead>
                                     <tbody>
                             </HeaderTemplate>
                             <ItemTemplate>
@@ -206,8 +180,7 @@
                                         <div class="pct-row">
                                             <span class="pct-label"><%# string.Format("{0:0}", Eval("Percentage")) %>%</span>
                                             <div class="pct-track">
-                                                <div class="pct-fill <%# GetPctClass(Eval("Percentage")) %>"
-                                                     style="width:<%# string.Format("{0:0}", Eval("Percentage")) %>%"></div>
+                                                <div class="pct-fill <%# GetPctClass(Eval("Percentage")) %>" style="width:<%# string.Format("{0:0}", Eval("Percentage")) %>%"></div>
                                             </div>
                                         </div>
                                     </td>
@@ -216,11 +189,10 @@
                             <FooterTemplate></tbody></table></FooterTemplate>
                         </asp:Repeater>
                         <asp:Panel ID="pnlNoTasks" runat="server" Visible="false">
-                            <div class="empty-state">No tasks assigned yet. <a href="CreateTask.aspx" style="color:var(--topbar);">Create one.</a></div>
+                            <div class="empty-state">No tasks yet. <a href='CreateTask.aspx?ClassID=<%= Request.QueryString["ClassID"] %>' style="color:var(--topbar);">Create one.</a></div>
                         </asp:Panel>
                     </div>
 
-                    <%-- Right: completion by student (also serves as enrolment list) --%>
                     <div class="card">
                         <div class="card-header">
                             <div class="card-header-icon" style="background:#eef8f3;"><i class="ti ti-users" style="color:#3a9e6e;font-size:17px;"></i></div>
@@ -229,21 +201,15 @@
                         <asp:Repeater ID="rptStudentStats" runat="server">
                             <HeaderTemplate>
                                 <table class="stats-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Student</th>
-                                            <th>Done</th>
-                                            <th class="pct-cell">Progress</th>
-                                        </tr>
-                                    </thead>
+                                    <thead><tr><th>Student</th><th>Done</th><th class="pct-cell">Progress</th></tr></thead>
                                     <tbody>
                             </HeaderTemplate>
                             <ItemTemplate>
                                 <tr>
                                     <td>
                                         <div class="student-name-cell">
-                                            <span class="student-avatar"><%# GetStudentInitials(Eval("FullName")) %></span>
-                                            <%# Eval("FullName") %>
+                                            <span class="student-avatar <%# GetStudentRowClass(Eval("TasksCompleted"), Eval("TotalTasks")) %>"><%# GetStudentInitials(Eval("FullName")) %></span>
+                                            <span class="<%# GetStudentRowClass(Eval("TasksCompleted"), Eval("TotalTasks")) %>"><%# Eval("FullName") %></span>
                                         </div>
                                     </td>
                                     <td><span class="fraction"><%# Eval("TasksCompleted") %> / <%# Eval("TotalTasks") %></span></td>
@@ -261,7 +227,7 @@
                             <FooterTemplate></tbody></table></FooterTemplate>
                         </asp:Repeater>
                         <asp:Panel ID="pnlNoStudents" runat="server" Visible="false">
-                            <div class="empty-state">No students enrolled in this class yet.</div>
+                            <div class="empty-state">No students enrolled yet.</div>
                         </asp:Panel>
                     </div>
 

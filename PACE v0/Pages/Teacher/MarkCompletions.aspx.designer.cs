@@ -60,40 +60,58 @@ namespace PACE
         protected global::System.Web.UI.WebControls.Label lblSuccess;
 
         /// <summary>
-        /// ddlClass control.
+        /// lblSelectedClass control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlClass;
+        protected global::System.Web.UI.WebControls.Label lblSelectedClass;
 
         /// <summary>
-        /// ddlTask control.
+        /// rptClasses control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlTask;
+        protected global::System.Web.UI.WebControls.Repeater rptClasses;
 
         /// <summary>
-        /// lblCompletionSummary control.
+        /// pnlTaskSelector control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblCompletionSummary;
+        protected global::System.Web.UI.WebControls.Panel pnlTaskSelector;
 
         /// <summary>
-        /// pnlHint control.
+        /// lblSelectedTask control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlHint;
+        protected global::System.Web.UI.WebControls.Label lblSelectedTask;
+
+        /// <summary>
+        /// rptTasks control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptTasks;
+
+        /// <summary>
+        /// pnlNoTasks control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlNoTasks;
 
         /// <summary>
         /// pnlStudents control.
@@ -103,6 +121,15 @@ namespace PACE
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel pnlStudents;
+
+        /// <summary>
+        /// lblCompletionSummary control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblCompletionSummary;
 
         /// <summary>
         /// rptStudents control.
