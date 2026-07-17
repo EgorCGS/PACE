@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="CreateTask.aspx.cs" Inherits="PACE.CreateTask" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" MaintainScrollPositionOnPostBack="true" CodeBehind="CreateTask.aspx.cs" Inherits="PACE.CreateTask" %>
 <!DOCTYPE html>
 <html lang="en">
 <head runat="server">
@@ -97,6 +97,14 @@
         .btn-ghost:hover { background:var(--bg); color:var(--text-dark); }
 
         .alert-success { background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:12px 16px; color:var(--green); margin-bottom:16px; font-size:13px; display:flex; align-items:center; gap:8px; }
+        /* Kept in the DOM at all times (not toggled with server Visible) so the postback
+           that first shows it never inserts or removes an element from the control tree,
+           which is what actually broke MaintainScrollPositionOnPostBack before this fix.
+           The hidden state collapses to zero height (max-height:0, overflow:hidden) rather
+           than reserving the full alert box, so the form does not carry a permanent empty
+           gap above it; the alert's height only appears at the moment a task is actually
+           created, a small, one-off reflow tied directly to the teacher's own action. */
+        .alert-success-wrap.alert-hidden { visibility:hidden; max-height:0; overflow:hidden; }
 
         .panel-card-header { display:flex; align-items:center; gap:9px; padding:14px 16px 12px; border-bottom:1px solid var(--border); }
         .panel-card-icon { width:30px; height:30px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
@@ -163,7 +171,7 @@
 
             <div class="content">
 
-                <asp:Panel ID="pnlSuccess" runat="server" Visible="false">
+                <asp:Panel ID="pnlSuccess" runat="server" CssClass="alert-success-wrap alert-hidden">
                     <div class="alert-success">
                         <i class="ti ti-circle-check" style="font-size:18px;"></i>
                         <asp:Label ID="lblSuccess" runat="server" />
@@ -261,6 +269,12 @@
     </form>
 
     <script>
+        /**
+         * Sets the hidden priority field and updates the selected visual state
+         * of the priority toggle buttons.
+         * @param {number} value - The priority level to store (3=High, 2=Med, 1=Low).
+         * @param {string} selectedClass - The CSS class to apply to the newly selected button.
+         */
         function setPriority(value, selectedClass) {
             document.getElementById('<%= hdnPriority.ClientID %>').value = value;
             document.querySelectorAll('.prio-btn').forEach(function(b) {
@@ -270,7 +284,10 @@
             document.getElementById(ids[value]).classList.add(selectedClass);
         }
 
-        // Restore priority toggle visual state after postback
+        /**
+         * Restores the priority toggle's selected visual state after postback, since the
+         * hidden field's value survives ViewState but the button CSS classes do not.
+         */
         (function () {
             var val = parseInt(document.getElementById('<%= hdnPriority.ClientID %>').value);
             var map = { 3: ['btnHigh', 'sel-high'], 2: ['btnMed', 'sel-med'], 1: ['btnLow', 'sel-low'] };

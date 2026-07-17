@@ -56,7 +56,7 @@
         .summary-number { font-size:30px; font-weight:700; color:var(--topbar); line-height:1; }
         .summary-label { font-size:12px; color:var(--text-muted); font-weight:500; }
 
-        .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+        .section-header { display:flex; align-items:center; justify-content:space-between; margin-top:28px; margin-bottom:14px; }
         .section-title { font-size:16px; font-weight:700; color:var(--text-dark); }
         .section-hint { font-size:12.5px; color:var(--text-muted); }
 
@@ -84,8 +84,10 @@
         .btn-card:hover { background:var(--hero-dark); }
         .btn-card.secondary { background:transparent; color:var(--topbar); border:1.5px solid var(--border); }
         .btn-card.secondary:hover { background:var(--bg); }
-        .overdue-tag { display:inline-flex; align-items:center; gap:4px; font-size:11.5px; font-weight:600; color:var(--red); margin-left:auto; }
-        .overdue-tag i { font-size:13px; }
+        .overdue-tag { display:flex; flex-direction:column; align-items:center; gap:1px; font-size:11.5px; font-weight:600; color:var(--red); margin-left:auto; line-height:1.15; }
+        .overdue-tag-count { display:inline-flex; align-items:center; gap:3px; }
+        .overdue-tag-count i { font-size:13px; }
+        .overdue-tag-label { font-size:10px; font-weight:500; }
 
         .quick-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
         .quick-card { background:var(--white); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); padding:20px; display:flex; align-items:center; gap:16px; text-decoration:none; color:var(--text-dark); transition:box-shadow 0.15s,background 0.15s; }
@@ -210,7 +212,7 @@
                                         <div class="class-card-footer">
                                             <a class="btn-card" href='TeacherClassPage.aspx?ClassID=<%# Eval("ClassID") %>'><i class="ti ti-arrow-right"></i> View Class</a>
                                             <a class="btn-card secondary" href='CreateTask.aspx?ClassID=<%# Eval("ClassID") %>'><i class="ti ti-plus"></i> Add Task</a>
-                                            <%# Convert.ToInt32(Eval("OverdueTasks")) > 0 ? "<span class='overdue-tag'><i class='ti ti-alert-triangle'></i>" + Eval("OverdueTasks") + " overdue</span>" : "" %>
+                                            <%# Convert.ToInt32(Eval("OverdueTasks")) > 0 ? "<span class='overdue-tag'><span class='overdue-tag-count'><i class='ti ti-alert-triangle'></i>" + Eval("OverdueTasks") + "</span><span class='overdue-tag-label'>overdue</span></span>" : "" %>
                                         </div>
                                     </div>
                                 </ItemTemplate>

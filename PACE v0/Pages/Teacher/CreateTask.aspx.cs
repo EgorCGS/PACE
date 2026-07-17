@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Web.UI;
 
@@ -10,6 +10,13 @@ namespace PACE
     {
         // - Page lifecycle -
 
+        /// <summary>
+        /// Enforces the teacher-only session guard, binds the sidebar class list on every
+        /// request, and on first load populates the class dropdown and applies any
+        /// pre-selected ClassID passed in the query string.
+        /// </summary>
+        /// <param name="sender">The page raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["Role"] == null)
@@ -32,12 +39,27 @@ namespace PACE
             {
                 // Populate class dropdown using SchoolClass.GetClassesByTeacher()
                 LoadClasses();
+
+                // Pre-select the class if arriving from a class-specific page
+                // (for example TeacherClassPage's "Create Task" button or
+                // TeacherDashboard's "Add Task" card link, both of which pass
+                // ?ClassID=). Only applied on first load, never on postback,
+                // so a teacher's own dropdown choice is never overwritten by
+                // a stale query string value on a later postback.
+                int queryClassID;
+                if (int.TryParse(Request.QueryString["ClassID"], out queryClassID) && queryClassID > 0
+                    && SchoolClass.IsOwnedByTeacher(queryClassID, Convert.ToInt32(Session["UserID"])))
+                {
+                    ddlClass.SelectedValue = queryClassID.ToString();
+                }
             }
         }
 
         // - Methods -
 
-        // Loads the teacher's own classes into the class dropdown.
+        /// <summary>
+        /// Loads the teacher's own classes into the class dropdown.
+        /// </summary>
         private void LoadClasses()
         {
             int teacherID = Convert.ToInt32(Session["UserID"]);
@@ -55,8 +77,12 @@ namespace PACE
                 ddlClass.Items.Insert(0, new System.Web.UI.WebControls.ListItem("-- Select a class --", "0"));
         }
 
-        // Fires when the Create Task button is clicked.
-        // Validates inputs then calls PaceTask.ValidateInputs() and PaceTask.Create().
+        /// <summary>
+        /// Fires when the Create Task button is clicked. Validates every field, verifies
+        /// class ownership, then calls PaceTask.Create() to insert the new task.
+        /// </summary>
+        /// <param name="sender">The Create Task control raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void btnCreateTask_Click(object sender, EventArgs e)
         {
             // Read form values
@@ -67,8 +93,18 @@ namespace PACE
             string dueDateStr = txtDueDate.Text.Trim();
             string priorityStr = hdnPriority.Value;
 
+            // Clear any success message left over from a previous submission before this
+            // one is validated, so a failed resubmission never shows a stale "created"
+            // banner from the last successful create. The panel itself stays in the DOM
+            // either way (see pnlSuccess markup), only its paint toggles here.
+            pnlSuccess.CssClass = "alert-success-wrap alert-hidden";
+
             bool isValid = true;
 
+            // Completeness check: class, title, subject, description, due date and priority
+            // are all required. A task missing any one of these is incomplete information
+            // a student could not act on (for example, a task with no due date cannot be
+            // shown as upcoming or overdue, and a task with no class cannot be assigned).
             // Existence check on class selection
             if (classIDStr == "0" || string.IsNullOrWhiteSpace(classIDStr))
             {
@@ -103,12 +139,27 @@ namespace PACE
             }
             else { lblDescError.Visible = false; }
 
-            // Type check on due date using PaceTask.ValidateInputs() for the date/priority portion
+            // Type check on due date, validation is implemented inline here rather than via
+            // PaceTask.ValidateInputs(), since this page's reasonableness check (due date
+            // must not be in the past) always fires, unlike ManageTasks where it only fires
+            // when the due date value has actually changed
             DateTime dueDate;
             if (!DateTime.TryParseExact(dueDateStr, "d/M/yyyy",
                     System.Globalization.CultureInfo.InvariantCulture,
                     System.Globalization.DateTimeStyles.None, out dueDate))
             {
+                lblDateError.Text = "Must be a valid date in DD/MM/YYYY format.";
+                lblDateError.Visible = true;
+                txtDueDate.CssClass = "form-input error";
+                isValid = false;
+            }
+            else if (dueDate.Date < DateTime.Today)
+            {
+                // Reasonableness check: a due date before today cannot give students any
+                // time to complete the task, so it is not a usable value even though it
+                // parsed as a valid date. This also catches accidental data-entry errors,
+                // such as typing the wrong year or day, before they reach the database.
+                lblDateError.Text = "Due date cannot be in the past.";
                 lblDateError.Visible = true;
                 txtDueDate.CssClass = "form-input error";
                 isValid = false;
@@ -138,14 +189,13 @@ namespace PACE
             }
 
             // All checks passed: create the task using PaceTask.Create()
-            // Note: ensure HomeworkTask.cs has been updated to use HomeworkTasks not PaceTasks
             int newTaskID = PaceTask.Create(classID, title, subject, description, dueDate, priority);
 
             if (newTaskID > 0)
             {
                 // Task created successfully: show success message and clear the form
                 lblSuccess.Text = "Task \"" + title + "\" was created successfully (Task ID: " + newTaskID + ").";
-                pnlSuccess.Visible = true;
+                pnlSuccess.CssClass = "alert-success-wrap";
 
                 txtTitle.Text = string.Empty;
                 txtSubject.Text = string.Empty;
@@ -158,12 +208,22 @@ namespace PACE
             }
         }
 
+        /// <summary>
+        /// Logs the teacher out and returns to the login page.
+        /// </summary>
+        /// <param name="sender">The logout control raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void btnLogout_Click(object sender, EventArgs e)
         {
             PaceUser.Logout();
             Response.Redirect("~/Login.aspx");
         }
 
+        /// <summary>
+        /// Builds a one or two letter initials string from the logged-in user's full name,
+        /// for display in the sidebar avatar.
+        /// </summary>
+        /// <returns>The user's initials in upper case, or "?" if no name is available.</returns>
         protected string GetInitials()
         {
             string name = Session["FullName"] != null ? Session["FullName"].ToString() : "?";

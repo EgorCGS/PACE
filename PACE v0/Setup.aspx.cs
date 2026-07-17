@@ -5,12 +5,31 @@ using System.Web.UI;
 
 namespace PACE
 {
+    // Code-behind for Setup.aspx, a test-data seeder page used to populate the
+    // database with the folio's test accounts, class, enrolments, and sample tasks.
+    // Not part of the production app, kept for folio evidence per CLAUDE.md.
     public partial class Setup : Page
     {
+        // - Page lifecycle -
+
+        /// <summary>
+        /// No setup work is needed on render, seeding only happens on button click.
+        /// </summary>
+        /// <param name="sender">The page raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void Page_Load(object sender, EventArgs e)
         {
         }
 
+        // - Methods -
+
+        /// <summary>
+        /// Seeds the database with the test teacher and student accounts, a sample
+        /// class, student enrolments, and sample homework tasks, skipping any records
+        /// that already exist so the button can be safely clicked more than once.
+        /// </summary>
+        /// <param name="sender">The Setup button raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void btnSetup_Click(object sender, EventArgs e)
         {
             string result = "";

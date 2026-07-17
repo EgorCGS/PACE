@@ -56,18 +56,31 @@
         /* Sticky filter bar sits below topbar */
         .filter-bar { position:sticky; top:var(--topbar-h); z-index:150; background:var(--white); border-bottom:1px solid var(--border); box-shadow:0 2px 8px rgba(74,111,165,0.08); padding:0 28px; height:var(--filterbar-h); display:flex; align-items:center; gap:10px; }
         .filter-chips { display:flex; gap:6px; flex:1; }
-        .chip { padding:5px 14px; border-radius:20px; font-size:13px; font-weight:500; cursor:pointer; border:1.5px solid var(--border); color:var(--text-muted); background:#fff; transition:all 0.15s; user-select:none; font-family:'DM Sans',sans-serif; }
+        /* appearance:none strips native button chrome, which otherwise renders with its own
+           box metrics (line-height, internal insets) layered on top of this padding, the same
+           issue .sort-select below is already reset for. line-height:1 then makes the chip's
+           vertical size fully determined by padding, not by an inherited or native line-height. */
+        .chip { padding:5px 14px; border-radius:20px; font-size:13px; font-weight:500; line-height:1; cursor:pointer; border:1.5px solid var(--border); color:var(--text-muted); background:#fff; appearance:none; -webkit-appearance:none; transition:all 0.15s; user-select:none; font-family:'DM Sans',sans-serif; }
         .chip:hover { border-color:var(--topbar); color:var(--topbar); }
-        .chip.active { background:var(--topbar); border-color:var(--topbar); color:#fff; font-weight:600; }
+        /* Active state uses background/border/color only, not font-weight, so the chip's
+           rendered text width never changes on toggle. A 500->600 weight swap on DM Sans
+           widens the glyphs enough to shift the whole flex row on activation. */
+        .chip.active { background:var(--topbar); border-color:var(--topbar); color:#fff; }
         .filter-right { display:flex; align-items:center; gap:8px; }
         .search-wrap { position:relative; display:flex; align-items:center; }
         .search-wrap i { position:absolute; left:10px; color:var(--text-muted); font-size:15px; pointer-events:none; }
         .search-input { padding:6px 12px 6px 32px; border-radius:8px; border:1.5px solid var(--border); background:var(--bg); font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text-dark); width:200px; outline:none; transition:border-color 0.15s; }
         .search-input:focus { border-color:var(--topbar); background:#fff; }
         .search-input::placeholder { color:var(--text-muted); }
-        .sort-select { padding:6px 28px 6px 10px; border-radius:8px; border:1.5px solid var(--border); background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237a9fbe' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 8px center; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text-dark); outline:none; appearance:none; cursor:pointer; transition:border-color 0.15s; }
+        /* Fixed width, not auto: a native <select> otherwise resizes to fit whichever
+           option is currently selected, which would shift the search box to its left
+           since .filter-chips (flex:1) absorbs whatever width .filter-right does not use. */
+        .sort-select { width:148px; padding:6px 28px 6px 10px; border-radius:8px; border:1.5px solid var(--border); background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237a9fbe' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 8px center; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text-dark); outline:none; appearance:none; cursor:pointer; transition:border-color 0.15s; }
         .sort-select:focus { border-color:var(--topbar); }
-        .filter-count { font-size:12.5px; color:var(--text-muted); white-space:nowrap; }
+        /* min-width reserves space for the longest realistic count text ("23 of 24 tasks")
+           so filtering/searching does not resize .filter-right and shift the search box,
+           which sits to its left inside the same flex row. */
+        .filter-count { font-size:12.5px; color:var(--text-muted); white-space:nowrap; min-width:100px; text-align:right; }
 
         .content { padding:24px 28px 40px; display:flex; flex-direction:column; gap:24px; }
         .section-label { font-size:10.5px; font-weight:600; letter-spacing:0.9px; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; }
@@ -190,9 +203,9 @@
 
             <div class="filter-bar">
                 <div class="filter-chips">
-                    <button type="button" class="chip active" data-filter="all"      onclick="setChip(this)">All Tasks</button>
-                    <button type="button" class="chip"        data-filter="pending"  onclick="setChip(this)">Pending</button>
+                    <button type="button" class="chip active" data-filter="pending"  onclick="setChip(this)">Pending</button>
                     <button type="button" class="chip"        data-filter="complete" onclick="setChip(this)">Completed</button>
+                    <button type="button" class="chip"        data-filter="all"      onclick="setChip(this)">All Tasks</button>
                     <button type="button" class="chip"        data-filter="high"     onclick="setChip(this)">High Priority</button>
                     <button type="button" class="chip"        data-filter="overdue"  onclick="setChip(this)">Overdue</button>
                 </div>
@@ -340,8 +353,14 @@
     </form>
 
     <script>
-        var activeFilter = 'all';
+        // Pending is the default view since that is what a student needs to act on first.
+        var activeFilter = 'pending';
 
+        /**
+         * Marks the clicked filter chip active, deactivates the rest, and re-applies
+         * the task filters using the chip's data-filter value.
+         * @param {HTMLElement} el - The chip element that was clicked.
+         */
         function setChip(el) {
             document.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('active'); });
             el.classList.add('active');
@@ -349,6 +368,10 @@
             applyFilters();
         }
 
+        /**
+         * Filters, searches, sorts, and re-renders the visible task rows based on the
+         * active chip, the search box, and the sort dropdown.
+         */
         function applyFilters() {
             var search  = document.getElementById('searchInput').value.toLowerCase();
             var sortBy  = document.getElementById('sortSelect').value;
@@ -369,13 +392,23 @@
                 if (show) visibleCount++;
             });
 
-            // Re-sort visible rows
+            // Re-sort visible rows.
+            // "due" is both the dropdown's default option and the page-load state, so it
+            // doubles as the default row order. Completion status is sorted first (pending
+            // before completed) so a completed task never outranks a pending one by date or
+            // priority alone, matching the same rule applied to the initial C# ORDER BY in
+            // StudentDashboard.aspx.cs LoadAllTasks and to the urgent-cards query.
             var visible = rows.filter(function(r) { return r.style.display !== 'none'; });
             visible.sort(function(a, b) {
-                if (sortBy === 'due')      return a.dataset.due.localeCompare(b.dataset.due);
+                if (sortBy === 'due') {
+                    if (a.dataset.status !== b.dataset.status) return a.dataset.status === 'pending' ? -1 : 1;
+                    var dueCompare = a.dataset.due.localeCompare(b.dataset.due);
+                    if (dueCompare !== 0) return dueCompare;
+                    return parseInt(b.dataset.priority) - parseInt(a.dataset.priority);
+                }
                 if (sortBy === 'priority') return parseInt(b.dataset.priority) - parseInt(a.dataset.priority);
                 if (sortBy === 'subject')  return a.dataset.subject.localeCompare(b.dataset.subject);
-                if (sortBy === 'status')   return a.dataset.status.localeCompare(b.dataset.status);
+                if (sortBy === 'status')   return b.dataset.status.localeCompare(a.dataset.status);
                 return 0;
             });
             visible.forEach(function(r) { tbody.appendChild(r); });

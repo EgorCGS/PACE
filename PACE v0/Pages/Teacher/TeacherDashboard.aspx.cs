@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -11,6 +11,12 @@ namespace PACE
     {
         // - Page lifecycle -
 
+        /// <summary>
+        /// Enforces the teacher-only session guard, binds the sidebar class list on every
+        /// request, and loads the dashboard summary and per-class stats on first load.
+        /// </summary>
+        /// <param name="sender">The page raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["Role"] == null) { Response.Redirect("~/Login.aspx"); return; }
@@ -30,8 +36,11 @@ namespace PACE
 
         // - Methods -
 
-        // Loads per-class stats and computes summary totals.
-        // Hides the dashboard panel and shows a first-run state if no classes exist.
+        /// <summary>
+        /// Loads per-class stats and computes summary totals.
+        /// Hides the dashboard panel and shows a first-run state if no classes exist.
+        /// </summary>
+        /// <param name="teacherID">The logged-in teacher whose classes should be summarised.</param>
         private void LoadDashboard(int teacherID)
         {
             string connStr = ConfigurationManager.ConnectionStrings["PACEConnectionString"].ConnectionString;
@@ -127,12 +136,22 @@ namespace PACE
             rptClasses.DataBind();
         }
 
+        /// <summary>
+        /// Logs the teacher out and returns to the login page.
+        /// </summary>
+        /// <param name="sender">The logout control raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void btnLogout_Click(object sender, EventArgs e)
         {
             PaceUser.Logout();
             Response.Redirect("~/Login.aspx");
         }
 
+        /// <summary>
+        /// Builds a one or two letter initials string from the logged-in user's full name,
+        /// for display in the sidebar avatar.
+        /// </summary>
+        /// <returns>The user's initials in upper case, or "?" if no name is available.</returns>
         protected string GetInitials()
         {
             string name = Session["FullName"] != null ? Session["FullName"].ToString() : "?";

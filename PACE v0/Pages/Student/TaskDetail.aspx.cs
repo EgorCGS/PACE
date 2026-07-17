@@ -13,6 +13,12 @@ namespace PACE
     {
         // - Page lifecycle -
 
+        /// <summary>
+        /// Enforces the student-only session guard, loads the sidebar, then resolves
+        /// and validates the TaskID query string parameter and loads the task on first load.
+        /// </summary>
+        /// <param name="sender">The page raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["Role"] == null) { Response.Redirect("~/Login.aspx"); return; }
@@ -40,7 +46,11 @@ namespace PACE
 
         // - Methods -
 
-        // Loads sidebar class list with pending and overdue counts per class.
+        /// <summary>
+        /// Loads the sidebar class list with pending and overdue counts per class.
+        /// </summary>
+        /// <param name="studentID">The logged-in student's UserID.</param>
+        /// <returns>A DataTable of the student's enrolled classes with pending/overdue counts.</returns>
         // OverdueCount drives the orange badge colour on the sidebar nav items.
         private DataTable LoadSidebarClasses(int studentID)
         {
@@ -75,8 +85,12 @@ namespace PACE
             return dt;
         }
 
-        // Loads the task and verifies the student is enrolled in the task's class.
-        // If the student is not enrolled, the not-found panel is shown instead.
+        /// <summary>
+        /// Loads the task's full details and verifies the student is enrolled in the
+        /// task's class. If the student is not enrolled, the not-found panel is shown instead.
+        /// </summary>
+        /// <param name="taskID">The task to load.</param>
+        /// <param name="studentID">The logged-in student's UserID.</param>
         private void LoadTask(int taskID, int studentID)
         {
             string connStr = ConfigurationManager.ConnectionStrings["PACEConnectionString"].ConnectionString;
@@ -129,12 +143,22 @@ namespace PACE
             }
         }
 
+        /// <summary>
+        /// Logs the student out and redirects to the login page.
+        /// </summary>
+        /// <param name="sender">The logout button raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void btnLogout_Click(object sender, EventArgs e)
         {
             PaceUser.Logout();
             Response.Redirect("~/Login.aspx");
         }
 
+        /// <summary>
+        /// Builds the one or two letter initials shown in the avatar badge from the
+        /// logged-in student's full name.
+        /// </summary>
+        /// <returns>The student's initials in uppercase, or "?" if no name is available.</returns>
         protected string GetInitials()
         {
             string name = Session["FullName"] != null ? Session["FullName"].ToString() : "?";
@@ -143,7 +167,12 @@ namespace PACE
             return (parts[0].Substring(0, 1) + parts[parts.Length - 1].Substring(0, 1)).ToUpper();
         }
 
-        private string GetPriorityBadge(int priority)
+        /// <summary>
+        /// Renders the priority badge markup, including an icon, for a task's priority level.
+        /// </summary>
+        /// <param name="priority">The PriorityLevel value (1, 2, or 3).</param>
+        /// <returns>HTML markup for the matching priority badge.</returns>
+        protected string GetPriorityBadge(int priority)
         {
             if (priority == 3) return "<span class=\"badge badge-high\"><i class=\"ti ti-arrow-up\"></i> High</span>";
             if (priority == 2) return "<span class=\"badge badge-med\"><i class=\"ti ti-minus\"></i> Medium</span>";

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Web;
 using System.Web.UI;
 
 namespace PACE
@@ -13,6 +12,12 @@ namespace PACE
     {
         // - Page lifecycle -
 
+        /// <summary>
+        /// Redirects an already-logged-in user straight to their role's dashboard;
+        /// otherwise lets the login form render.
+        /// </summary>
+        /// <param name="sender">The page raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         // Runs on every request before the page is rendered.
         // If a valid session already exists, the user is redirected away from the
         // login page immediately so they do not see it again unnecessarily.
@@ -40,10 +45,13 @@ namespace PACE
 
         // - Methods -
 
-        // Fires when the Sign In button is clicked.
-        // Validates both fields for existence, then calls PaceUser.Authenticate().
-        // If authentication succeeds, redirects by role.
-        // If authentication fails, displays the appropriate error UI.
+        /// <summary>
+        /// Validates the username and password fields for existence, authenticates
+        /// against the database, and redirects by role on success or shows the
+        /// appropriate error UI on failure.
+        /// </summary>
+        /// <param name="sender">The Sign In button raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void btnLogin_Click(object sender, EventArgs e)
         {
             // Read the submitted values and trim whitespace

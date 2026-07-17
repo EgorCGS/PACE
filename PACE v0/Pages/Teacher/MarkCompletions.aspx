@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="MarkCompletions.aspx.cs" Inherits="PACE.MarkCompletions" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" MaintainScrollPositionOnPostBack="true" CodeBehind="MarkCompletions.aspx.cs" Inherits="PACE.MarkCompletions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head runat="server">
@@ -129,6 +129,11 @@
         .completion-pct { font-size:13px; font-weight:700; color:var(--green); white-space:nowrap; }
 
         .alert-success { background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:12px 16px; color:var(--green); font-size:13px; display:flex; align-items:center; gap:8px; }
+        /* Kept in the DOM (not toggled with server Visible) for the whole of step 3, and only
+           its paint is toggled here, so the very first mark/unmark of a session does not insert
+           a new element and shift page height under MaintainScrollPositionOnPostBack. */
+        .alert-success-wrap.alert-hidden { visibility:hidden; }
+        .btn-changeclass { margin-left:auto; }
         .hint-state { padding:36px 20px; text-align:center; color:var(--text-muted); font-size:13px; }
         .empty-state { padding:36px 20px; text-align:center; color:var(--text-muted); }
     </style>
@@ -186,23 +191,30 @@
 
             <div class="content">
 
-                <%-- Step indicator: uses selected state (not done checkmark) until a student is actually marked --%>
-                <div class="steps-bar">
-                    <div class="step <%= GetStepClass(1) %>">
-                        <span class="step-num">1</span>
-                        <span>Choose Class</span>
+                <%-- Step indicator: uses selected state (not done checkmark) until a student is actually marked.
+                     btnChangeClass sits alongside it so the teacher can back out to step 1 from step 2 or 3
+                     without browser back navigation, its own Visible is toggled server side in Page_PreRender. --%>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div class="steps-bar" style="flex:1;">
+                        <div class="step <%= GetStepClass(1) %>">
+                            <span class="step-num">1</span>
+                            <span>Choose Class</span>
+                        </div>
+                        <div class="step <%= GetStepClass(2) %>">
+                            <span class="step-num">2</span>
+                            <span>Choose Task</span>
+                        </div>
+                        <div class="step <%= GetStepClass(3) %>">
+                            <span class="step-num">3</span>
+                            <span>Mark Students</span>
+                        </div>
                     </div>
-                    <div class="step <%= GetStepClass(2) %>">
-                        <span class="step-num">2</span>
-                        <span>Choose Task</span>
-                    </div>
-                    <div class="step <%= GetStepClass(3) %>">
-                        <span class="step-num">3</span>
-                        <span>Mark Students</span>
-                    </div>
+                    <asp:LinkButton ID="btnChangeClass" runat="server" CssClass="btn-select" Visible="false" OnClick="btnChangeClass_Click">
+                        <i class="ti ti-arrow-back-up"></i> Change Class
+                    </asp:LinkButton>
                 </div>
 
-                <asp:Panel ID="pnlSuccess" runat="server" Visible="false">
+                <asp:Panel ID="pnlSuccess" runat="server" CssClass="alert-success-wrap alert-hidden" Visible="false">
                     <div class="alert-success"><i class="ti ti-circle-check" style="font-size:18px;"></i><asp:Label ID="lblSuccess" runat="server" /></div>
                 </asp:Panel>
 
@@ -241,7 +253,7 @@
                             <HeaderTemplate>
                                 <table class="task-table">
                                     <thead>
-                                        <tr><th>Task</th><th>Due Date</th><th>Priority</th><th>Completed</th><th style="text-align:right;padding-right:16px;"></th></tr>
+                                        <tr><th>Task</th><th>Due Date</th><th>Priority</th><th style="width:100px;">Completed</th><th style="text-align:right;padding-right:16px;"></th></tr>
                                     </thead>
                                     <tbody>
                             </HeaderTemplate>
@@ -285,7 +297,7 @@
                             <HeaderTemplate>
                                 <table class="student-table">
                                     <thead>
-                                        <tr><th>Student</th><th>Status</th><th style="text-align:right;padding-right:20px;">Action</th></tr>
+                                        <tr><th>Student</th><th style="width:110px;">Status</th><th style="text-align:right;padding-right:20px;">Action</th></tr>
                                     </thead>
                                     <tbody>
                             </HeaderTemplate>

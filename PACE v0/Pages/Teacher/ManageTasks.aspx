@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ManageTasks.aspx.cs" Inherits="PACE.ManageTasks" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" MaintainScrollPositionOnPostBack="true" CodeBehind="ManageTasks.aspx.cs" Inherits="PACE.ManageTasks" %>
 <!DOCTYPE html>
 <html lang="en">
 <head runat="server">
@@ -97,6 +97,19 @@
 
         .alert-success { background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:12px 16px; color:var(--green); font-size:13px; display:flex; align-items:center; gap:8px; }
         .alert-error   { background:var(--red-bg); border:1px solid var(--red-border); border-radius:8px; padding:12px 16px; color:var(--red); font-size:13px; display:flex; align-items:center; gap:8px; }
+        /* pnlSuccess and pnlError are both kept in the DOM at all times (not toggled with
+           server Visible) so the postback that first shows either one never inserts or
+           removes an element from the control tree, which is what actually broke
+           MaintainScrollPositionOnPostBack before this fix. Only ever one of the two is
+           shown at a time, so both sit in the same CSS grid cell (grid-area 1/1) rather than
+           stacking. The hidden state collapses to zero height (max-height:0, overflow:hidden)
+           instead of reserving the full alert box, so browsing the page normally does not
+           leave a permanent empty gap; the alert box's own height only appears at the moment
+           a save/delete genuinely produces a result, which is a small, expected, one-off
+           reflow tied directly to the action the teacher just took, not a page-load gap. */
+        .alert-area { display:grid; }
+        .alert-area > .alert-success-wrap, .alert-area > .alert-error-wrap { grid-area:1 / 1; }
+        .alert-success-wrap.alert-hidden, .alert-error-wrap.alert-hidden { visibility:hidden; max-height:0; overflow:hidden; }
         .empty-state { padding:48px 20px; text-align:center; color:var(--text-muted); }
     </style>
 </head>
@@ -153,13 +166,24 @@
 
             <div class="content">
 
-                <asp:Panel ID="pnlSuccess" runat="server" Visible="false">
-                    <div class="alert-success"><i class="ti ti-circle-check" style="font-size:18px;"></i><asp:Label ID="lblSuccess" runat="server" /></div>
-                </asp:Panel>
-                <asp:Panel ID="pnlError" runat="server" Visible="false">
-                    <div class="alert-error"><i class="ti ti-alert-circle" style="font-size:18px;"></i><asp:Label ID="lblError" runat="server" /></div>
-                </asp:Panel>
+                <div class="alert-area">
+                    <asp:Panel ID="pnlSuccess" runat="server" CssClass="alert-success-wrap alert-hidden">
+                        <div class="alert-success"><i class="ti ti-circle-check" style="font-size:18px;"></i><asp:Label ID="lblSuccess" runat="server" /></div>
+                    </asp:Panel>
+                    <asp:Panel ID="pnlError" runat="server" CssClass="alert-error-wrap alert-hidden">
+                        <div class="alert-error"><i class="ti ti-alert-circle" style="font-size:18px;"></i><asp:Label ID="lblError" runat="server" /></div>
+                    </asp:Panel>
+                </div>
 
+                <%-- pnlEditForm is a large card, not a small banner. Reserving its full height
+                     permanently would leave a large empty gap on a page that is mostly just
+                     browsing the task list, so unlike pnlSuccess/pnlError above it keeps using
+                     the server Visible property as the real open/closed switch (a jump is
+                     accepted at the moment a row's edit genuinely opens or closes). What it
+                     avoids is jumping AGAIN while already open: switching the edit target to a
+                     different row, or a failed Save, never toggles Visible, only refills the
+                     same still-open panel, so those interactions cause no additional jump. See
+                     ManageTasks.aspx.cs LoadEditForm / btnSaveEdit_Click for where this is enforced. --%>
                 <asp:Panel ID="pnlEditForm" runat="server" Visible="false">
                     <div class="card">
                         <div class="card-header">
@@ -220,7 +244,7 @@
                             <table class="task-table">
                                 <thead>
                                     <tr>
-                                        <th>Task</th><th>Class</th><th>Due Date</th><th>Priority</th>
+                                        <th>Task</th><th>Class</th><th>Due Date</th><th style="width:90px;">Priority</th>
                                         <th style="text-align:right;padding-right:18px;">Actions</th>
                                     </tr>
                                 </thead>

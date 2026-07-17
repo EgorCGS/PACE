@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -14,6 +14,12 @@ namespace PACE
     {
         // - Page lifecycle -
 
+        /// <summary>
+        /// Enforces the teacher-only session guard, binds the sidebar class list on every
+        /// request, and loads the task table on first load.
+        /// </summary>
+        /// <param name="sender">The page raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["Role"] == null) { Response.Redirect("~/Login.aspx"); return; }
@@ -33,7 +39,9 @@ namespace PACE
 
         // - Methods -
 
-        // Loads all tasks created by the logged-in teacher across all their classes.
+        /// <summary>
+        /// Loads all tasks created by the logged-in teacher across all their classes.
+        /// </summary>
         private void LoadTasks()
         {
             int teacherID = Convert.ToInt32(Session["UserID"]);
@@ -69,7 +77,11 @@ namespace PACE
             pnlNoTasks.Visible = dt.Rows.Count == 0;
         }
 
-        // Handles Edit and Delete button clicks from the task table Repeater.
+        /// <summary>
+        /// Handles Edit and Delete button clicks from the task table Repeater.
+        /// </summary>
+        /// <param name="sender">The Repeater raising the command.</param>
+        /// <param name="e">Command arguments, carrying the clicked task's ID and command name.</param>
         protected void TaskCommand(object sender, CommandEventArgs e)
         {
             int taskID = Convert.ToInt32(e.CommandArgument);
@@ -85,10 +97,26 @@ namespace PACE
             }
         }
 
-        // Populates the edit form with the selected task's current values
-        // and makes the edit panel visible.
+        /// <summary>
+        /// Populates the edit form with the selected task's current values
+        /// and makes the edit panel visible.
+        /// </summary>
+        /// <param name="taskID">The task to load into the edit form.</param>
+        /// <param name="teacherID">The logged-in teacher, used to verify ownership.</param>
         private void LoadEditForm(int taskID, int teacherID)
         {
+            // An Edit click always starts a fresh edit session, whether the panel was
+            // previously closed or was already open on a different row. Clearing the
+            // success/error banners here satisfies "opening edit hides a stale message
+            // from a previous action", and clearing the per-field error Labels stops a
+            // validation error shown for the last row edited from reappearing against the
+            // next row before that row's own Save is even attempted.
+            ClearAlerts();
+            lblEditTitleError.Visible = false;
+            lblEditSubjectError.Visible = false;
+            lblEditDescError.Visible = false;
+            lblEditDateError.Visible = false;
+
             string connStr = ConfigurationManager.ConnectionStrings["PACEConnectionString"].ConnectionString;
 
             using (SqlConnection conn = new SqlConnection(connStr))
@@ -122,6 +150,18 @@ namespace PACE
                         }
                         else
                         {
+                            // Task not found or not owned by this teacher. Close the panel
+                            // and clear the fields that were just populated for whichever
+                            // row was open before this click, so a rejected Edit never
+                            // leaves stale values sitting behind a closed panel (or, if a
+                            // different row was already open, showing through as if they
+                            // belonged to this task).
+                            hdnEditTaskID.Value = "";
+                            txtEditTitle.Text = "";
+                            txtEditSubject.Text = "";
+                            txtEditDescription.Text = "";
+                            txtEditDueDate.Text = "";
+                            pnlEditForm.Visible = false;
                             ShowError("You do not have permission to edit this task.");
                         }
                     }
@@ -131,8 +171,12 @@ namespace PACE
             LoadTasks();
         }
 
-        // Deletes a task after verifying the teacher owns the class it belongs to.
-        // Completion records are deleted first to satisfy the foreign key constraint.
+        /// <summary>
+        /// Deletes a task after verifying the teacher owns the class it belongs to.
+        /// Completion records are deleted first to satisfy the foreign key constraint.
+        /// </summary>
+        /// <param name="taskID">The task to delete.</param>
+        /// <param name="teacherID">The logged-in teacher, used to verify ownership.</param>
         private void DeleteTask(int taskID, int teacherID)
         {
             // Get the class ID for this task so we can check ownership
@@ -172,7 +216,11 @@ namespace PACE
             LoadTasks();
         }
 
-        // Saves changes from the edit form back to the database.
+        /// <summary>
+        /// Saves changes from the edit form back to the database.
+        /// </summary>
+        /// <param name="sender">The Save Changes control raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void btnSaveEdit_Click(object sender, EventArgs e)
         {
             int taskID = Convert.ToInt32(hdnEditTaskID.Value);
@@ -186,6 +234,9 @@ namespace PACE
 
             bool isValid = true;
 
+            // Completeness check: title, subject, description and due date are all required.
+            // A task missing any of these is incomplete information a student could not act
+            // on, so the same completeness standard used on creation applies to edits.
             // Existence checks on each field
             if (string.IsNullOrWhiteSpace(title)) { lblEditTitleError.Visible = true; isValid = false; }
             else { lblEditTitleError.Visible = false; }
@@ -202,11 +253,34 @@ namespace PACE
                     System.Globalization.CultureInfo.InvariantCulture,
                     System.Globalization.DateTimeStyles.None, out dueDate))
             {
+                lblEditDateError.Text = "Must be a valid date in DD/MM/YYYY format.";
                 lblEditDateError.Visible = true;
                 isValid = false;
             }
-            else { lblEditDateError.Visible = false; }
+            else
+            {
+                // Reasonableness check: a due date before today cannot give students any
+                // time to complete the task, so it is not a usable value even though it
+                // parsed as a valid date. This also catches accidental data-entry errors,
+                // such as typing the wrong year or day, before they reach the database.
+                // This only fires when the teacher is actually changing the due date to a
+                // past value. An existing task that has simply become overdue since it was
+                // created must still be editable (for example, fixing a typo in the title)
+                // without being forced to push the due date into the future first.
+                DateTime originalDueDate = GetOriginalDueDate(taskID);
+                if (dueDate.Date != originalDueDate.Date && dueDate.Date < DateTime.Today)
+                {
+                    lblEditDateError.Text = "Due date cannot be in the past.";
+                    lblEditDateError.Visible = true;
+                    isValid = false;
+                }
+                else { lblEditDateError.Visible = false; }
+            }
 
+            // A validation failure keeps the panel open on the same row (Visible was already
+            // true when this postback started, so this just re-affirms it) and shows its own
+            // per-field error Labels, not the pnlSuccess/pnlError banners, which is why
+            // neither ShowSuccess nor ShowError is called on this path.
             if (!isValid) { pnlEditForm.Visible = true; LoadTasks(); return; }
 
             int priority = Convert.ToInt32(priorityStr);
@@ -237,16 +311,24 @@ namespace PACE
             LoadTasks();
         }
 
-        // Closes the edit form without saving.
+        /// <summary>
+        /// Closes the edit form without saving. No success or error message is shown,
+        /// cancelling is not itself an outcome worth reporting.
+        /// </summary>
+        /// <param name="sender">The Cancel control raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void btnCancelEdit_Click(object sender, EventArgs e)
         {
             pnlEditForm.Visible = false;
-            pnlSuccess.Visible = false;
-            pnlError.Visible = false;
+            ClearAlerts();
             LoadTasks();
         }
 
-        // Returns the ClassID for a given task. Used for ownership verification.
+        /// <summary>
+        /// Returns the ClassID for a given task. Used for ownership verification.
+        /// </summary>
+        /// <param name="taskID">The task to look up.</param>
+        /// <returns>The task's ClassID, or 0 if the task does not exist.</returns>
         private int GetClassIDForTask(int taskID)
         {
             string connStr = ConfigurationManager.ConnectionStrings["PACEConnectionString"].ConnectionString;
@@ -263,12 +345,45 @@ namespace PACE
             }
         }
 
+        /// <summary>
+        /// Returns the currently stored due date for a task. Used by the reasonableness
+        /// check in btnSaveEdit_Click to tell an unchanged (now overdue) due date apart
+        /// from a newly entered past date.
+        /// </summary>
+        /// <param name="taskID">The task to look up.</param>
+        /// <returns>The task's currently stored due date, or DateTime.MinValue if the task does not exist.</returns>
+        private DateTime GetOriginalDueDate(int taskID)
+        {
+            string connStr = ConfigurationManager.ConnectionStrings["PACEConnectionString"].ConnectionString;
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand(
+                    "SELECT DueDate FROM HomeworkTasks WHERE TaskID = @TaskID", conn))
+                {
+                    cmd.Parameters.AddWithValue("@TaskID", taskID);
+                    object result = cmd.ExecuteScalar();
+                    return result != null ? Convert.ToDateTime(result) : DateTime.MinValue;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Logs the teacher out and returns to the login page.
+        /// </summary>
+        /// <param name="sender">The logout control raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void btnLogout_Click(object sender, EventArgs e)
         {
             PaceUser.Logout();
             Response.Redirect("~/Login.aspx");
         }
 
+        /// <summary>
+        /// Builds a one or two letter initials string from the logged-in user's full name,
+        /// for display in the sidebar avatar.
+        /// </summary>
+        /// <returns>The user's initials in upper case, or "?" if no name is available.</returns>
         protected string GetInitials()
         {
             string name = Session["FullName"] != null ? Session["FullName"].ToString() : "?";
@@ -277,6 +392,11 @@ namespace PACE
             return (parts[0].Substring(0, 1) + parts[parts.Length - 1].Substring(0, 1)).ToUpper();
         }
 
+        /// <summary>
+        /// Returns an HTML badge for a task's priority level.
+        /// </summary>
+        /// <param name="priorityObj">The PriorityLevel value from the data source (1, 2, or 3).</param>
+        /// <returns>An HTML span with the appropriate badge class and label.</returns>
         protected string GetPriorityBadge(object priorityObj)
         {
             int p = Convert.ToInt32(priorityObj);
@@ -285,18 +405,40 @@ namespace PACE
             return "<span class=\"badge badge-low\">Low</span>";
         }
 
+        // pnlSuccess and pnlError are both kept in the DOM at all times (see markup), so
+        // "showing" one is purely a CSS class swap, never a Visible change, and the two are
+        // always set together so exactly one is ever unhidden at a time.
+        /// <summary>
+        /// Shows the success banner with the given message and hides the error banner.
+        /// </summary>
+        /// <param name="message">The success message to display.</param>
         private void ShowSuccess(string message)
         {
             lblSuccess.Text = message;
-            pnlSuccess.Visible = true;
-            pnlError.Visible = false;
+            pnlSuccess.CssClass = "alert-success-wrap";
+            pnlError.CssClass = "alert-error-wrap alert-hidden";
         }
 
+        /// <summary>
+        /// Shows the error banner with the given message and hides the success banner.
+        /// </summary>
+        /// <param name="message">The error message to display.</param>
         private void ShowError(string message)
         {
             lblError.Text = message;
-            pnlError.Visible = true;
-            pnlSuccess.Visible = false;
+            pnlError.CssClass = "alert-error-wrap";
+            pnlSuccess.CssClass = "alert-success-wrap alert-hidden";
+        }
+
+        /// <summary>
+        /// Hides both banners without showing either, used when an action (Edit, Cancel)
+        /// should clear away any leftover message from a previous action rather than
+        /// replace it with a new one.
+        /// </summary>
+        private void ClearAlerts()
+        {
+            pnlSuccess.CssClass = "alert-success-wrap alert-hidden";
+            pnlError.CssClass = "alert-error-wrap alert-hidden";
         }
     }
 }

@@ -78,7 +78,6 @@
     <Content Include="Pages\Teacher\CreateTask.aspx" />
     <Content Include="Pages\Teacher\ManageTasks.aspx" />
     <Content Include="Pages\Teacher\MarkCompletions.aspx" />
-    <Content Include="Pages\Teacher\Statistics.aspx" />
     <Content Include="Pages\Teacher\TeacherClassPage.aspx" />
     <Content Include="Pages\Teacher\TeacherDashboard.aspx" />
     <Content Include="Setup.aspx" />
@@ -133,13 +132,6 @@
     </Compile>
     <Compile Include="Pages\Teacher\MarkCompletions.aspx.designer.cs">
       <DependentUpon>MarkCompletions.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Pages\Teacher\Statistics.aspx.cs">
-      <DependentUpon>Statistics.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\Teacher\Statistics.aspx.designer.cs">
-      <DependentUpon>Statistics.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Teacher\TeacherClassPage.aspx.cs">
       <DependentUpon>TeacherClassPage.aspx</DependentUpon>

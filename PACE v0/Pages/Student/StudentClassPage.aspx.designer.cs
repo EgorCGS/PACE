@@ -60,6 +60,33 @@ namespace PACE
         protected global::System.Web.UI.WebControls.Label lblHeroTitle;
 
         /// <summary>
+        /// lblStatTotal control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblStatTotal;
+
+        /// <summary>
+        /// lblStatCompleted control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblStatCompleted;
+
+        /// <summary>
+        /// lblStatPending control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblStatPending;
+
+        /// <summary>
         /// lblTaskCount control.
         /// </summary>
         /// <remarks>

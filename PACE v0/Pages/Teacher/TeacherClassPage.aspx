@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="TeacherClassPage.aspx.cs" Inherits="PACE.TeacherClassPage" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="TeacherClassPage.aspx.cs" Inherits="PACE.TeacherClassPage" %>
 <!DOCTYPE html>
 <html lang="en">
 <head runat="server">
@@ -85,7 +85,31 @@
         .student-avatar { width:30px; height:30px; border-radius:50%; background:rgba(74,111,165,0.12); color:#3a5a8c; font-size:11.5px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; border:1px solid #b8cde8; margin-right:8px; }
         .student-name-cell { display:flex; align-items:center; }
         .student-behind { color:var(--red); }
+        .student-partial { color:var(--orange); }
+        .student-complete { color:var(--green); }
         .empty-state { padding:40px 20px; text-align:center; color:var(--text-muted); font-size:13px; }
+
+        /* Student Distribution graph (stacked bar, green/orange/red buckets) */
+        .graph-card-body { padding:20px; }
+        .dist-bar { display:flex; width:100%; height:26px; border-radius:8px; overflow:hidden; border:1px solid var(--border); background:var(--bg); }
+        .dist-seg { height:100%; transition:width 0.2s; }
+        .dist-seg-green  { background:linear-gradient(90deg,#2d8a5f,var(--green)); }
+        .dist-seg-orange { background:linear-gradient(90deg,#b86e10,var(--orange)); }
+        .dist-seg-red    { background:linear-gradient(90deg,#b84040,var(--red)); }
+        .dist-legend { display:flex; flex-wrap:wrap; gap:18px; margin-top:16px; }
+        .dist-legend-item { display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-dark); }
+        .dist-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+        .dist-dot-green  { background:var(--green); }
+        .dist-dot-orange { background:var(--orange); }
+        .dist-dot-red    { background:var(--red); }
+        .dist-count { font-weight:700; }
+
+        /* Completion Trend graph (bar per day, height proportional to completions) */
+        .trend-chart-scroll { overflow-x:auto; }
+        .trend-chart { display:flex; align-items:flex-end; gap:8px; height:140px; padding:10px 4px 0; min-width:100%; }
+        .trend-bar-col { display:flex; flex-direction:column; align-items:center; flex:0 0 auto; width:26px; height:100%; justify-content:flex-end; }
+        .trend-bar { width:16px; min-height:4px; border-radius:4px 4px 0 0; background:linear-gradient(180deg,var(--topbar),var(--sidebar)); }
+        .trend-date-label { font-size:9.5px; color:var(--text-muted); margin-top:6px; white-space:nowrap; }
     </style>
 </head>
 <body>
@@ -141,7 +165,7 @@
 
                 <div class="actions-row">
                     <a class="btn-action" href='CreateTask.aspx?ClassID=<%= Request.QueryString["ClassID"] %>'><i class="ti ti-plus"></i> Create Task</a>
-                    <a class="btn-action secondary" href="MarkCompletions.aspx"><i class="ti ti-clipboard-check"></i> Mark Completions</a>
+                    <a class="btn-action secondary" href='MarkCompletions.aspx?ClassID=<%= Request.QueryString["ClassID"] %>'><i class="ti ti-clipboard-check"></i> Mark Completions</a>
                 </div>
 
                 <div class="summary-strip">
@@ -157,6 +181,60 @@
                         <div class="summary-number"><asp:Label ID="lblOverallPct" runat="server" /></div>
                         <div class="summary-label">Overall completion</div>
                     </div>
+                </div>
+
+                <div class="stats-grid">
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-icon" style="background:#eef2fb;"><i class="ti ti-chart-bar" style="color:#4a6fa5;font-size:17px;"></i></div>
+                            <span class="card-header-title">Student Distribution</span>
+                        </div>
+                        <div class="graph-card-body">
+                            <asp:Panel ID="pnlDistributionChart" runat="server">
+                                <div class="dist-bar">
+                                    <asp:Panel ID="pnlOnTrackSeg" runat="server" CssClass="dist-seg dist-seg-green" />
+                                    <asp:Panel ID="pnlAtRiskSeg" runat="server" CssClass="dist-seg dist-seg-orange" />
+                                    <asp:Panel ID="pnlBehindSeg" runat="server" CssClass="dist-seg dist-seg-red" />
+                                </div>
+                                <div class="dist-legend">
+                                    <div class="dist-legend-item"><span class="dist-dot dist-dot-green"></span>On Track (75%+): <span class="dist-count"><asp:Label ID="lblOnTrackCount" runat="server" /></span></div>
+                                    <div class="dist-legend-item"><span class="dist-dot dist-dot-orange"></span>At Risk (40-74%): <span class="dist-count"><asp:Label ID="lblAtRiskCount" runat="server" /></span></div>
+                                    <div class="dist-legend-item"><span class="dist-dot dist-dot-red"></span>Behind (under 40%): <span class="dist-count"><asp:Label ID="lblBehindCount" runat="server" /></span></div>
+                                </div>
+                            </asp:Panel>
+                            <asp:Panel ID="pnlDistributionEmpty" runat="server" Visible="false">
+                                <div class="empty-state">No tasks assigned yet. Add a task to see how students are tracking.</div>
+                            </asp:Panel>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-icon" style="background:#e8f0fa;"><i class="ti ti-trending-up" style="color:#3a5a8c;font-size:17px;"></i></div>
+                            <span class="card-header-title">Completion Trend (Last 30 Days)</span>
+                        </div>
+                        <div class="graph-card-body">
+                            <asp:Panel ID="pnlTrendChart" runat="server">
+                                <div class="trend-chart-scroll">
+                                    <div class="trend-chart">
+                                        <asp:Repeater ID="rptCompletionTrend" runat="server">
+                                            <ItemTemplate>
+                                                <div class="trend-bar-col">
+                                                    <div class="trend-bar" style='height:<%# GetTrendBarHeight(Eval("CompletionCount")) %>%' title='<%# GetTrendTooltip(Eval("CompletionDate"), Eval("CompletionCount")) %>'></div>
+                                                    <div class="trend-date-label"><%# GetTrendDateLabel(Eval("CompletionDate")) %></div>
+                                                </div>
+                                            </ItemTemplate>
+                                        </asp:Repeater>
+                                    </div>
+                                </div>
+                            </asp:Panel>
+                            <asp:Panel ID="pnlTrendEmpty" runat="server" Visible="false">
+                                <div class="empty-state">No completions marked yet in the last 30 days.</div>
+                            </asp:Panel>
+                        </div>
+                    </div>
+
                 </div>
 
                 <div class="stats-grid">

@@ -18,6 +18,12 @@ namespace PACE
 
         // - Page lifecycle -
 
+        /// <summary>
+        /// Enforces the student-only session guard, then loads the dashboard's data
+        /// (task list, urgent tasks, sidebar, bottom cards) on first load.
+        /// </summary>
+        /// <param name="sender">The page raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["Role"] == null) { Response.Redirect("~/Login.aspx"); return; }
@@ -33,6 +39,12 @@ namespace PACE
 
         // - Methods -
 
+        /// <summary>
+        /// Orchestrates loading of every dashboard section for the given student:
+        /// the full task list, the pending/total counters, urgent tasks, sidebar
+        /// classes, and the bottom summary cards.
+        /// </summary>
+        /// <param name="studentID">The logged-in student's UserID.</param>
         private void LoadAll(int studentID)
         {
             string connStr = ConfigurationManager.ConnectionStrings["PACEConnectionString"].ConnectionString;
@@ -54,7 +66,18 @@ namespace PACE
             BuildBottomCards(allTasks);
         }
 
-        // Loads all tasks across all enrolled classes with completion status.
+        /// <summary>
+        /// Loads all tasks across all classes the student is enrolled in, together
+        /// with each task's completion status for this student.
+        /// </summary>
+        /// <param name="studentID">The logged-in student's UserID.</param>
+        /// <param name="connStr">The database connection string.</param>
+        /// <returns>A DataTable of tasks with class name and completion status.</returns>
+        // ORDER BY sorts on MarkedComplete first so pending tasks always come before
+        // completed ones, then DueDate ascending and PriorityLevel descending within each
+        // group. This mirrors the default "due" sort in the page's client-side JS
+        // (applyFilters in StudentDashboard.aspx) so a completed task is never ranked
+        // ahead of a pending one purely because it is due sooner or marked higher priority.
         private DataTable LoadAllTasks(int studentID, string connStr)
         {
             DataTable dt = new DataTable();
@@ -70,7 +93,7 @@ namespace PACE
                     "INNER JOIN ClassEnrolments ce ON c.ClassID = ce.ClassID " +
                     "LEFT JOIN CompletionRecords cr ON ht.TaskID = cr.TaskID AND cr.StudentID = @StudentID " +
                     "WHERE ce.StudentID = @StudentID " +
-                    "ORDER BY ht.DueDate ASC, ht.PriorityLevel DESC";
+                    "ORDER BY ISNULL(cr.MarkedComplete, 0) ASC, ht.DueDate ASC, ht.PriorityLevel DESC";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
                 {
@@ -84,7 +107,12 @@ namespace PACE
             return dt;
         }
 
-        // Loads at most 2 urgent tasks due within 2 days that are still pending.
+        /// <summary>
+        /// Loads at most 2 urgent tasks due within 2 days that are still pending,
+        /// and shows the urgent panel if any are found.
+        /// </summary>
+        /// <param name="studentID">The logged-in student's UserID.</param>
+        /// <param name="connStr">The database connection string.</param>
         private void LoadUrgentTasks(int studentID, string connStr)
         {
             DataTable dt = new DataTable();
@@ -120,8 +148,12 @@ namespace PACE
             }
         }
 
-        // Loads the sidebar class list with pending count AND overdue count per class.
-        // OverdueCount drives the orange badge colour — if any pending task is overdue,
+        /// <summary>
+        /// Loads the sidebar class list with pending count and overdue count per class.
+        /// </summary>
+        /// <param name="studentID">The logged-in student's UserID.</param>
+        /// <param name="connStr">The database connection string.</param>
+        // OverdueCount drives the orange badge colour, if any pending task is overdue,
         // the badge turns orange to signal urgency rather than just quantity.
         private void LoadSidebarClasses(int studentID, string connStr)
         {
@@ -155,8 +187,11 @@ namespace PACE
             rptSidebarClasses.DataBind();
         }
 
-        // Builds the My Classes and Completion Progress bottom cards
-        // by grouping the already-loaded tasks DataTable by class in C#.
+        /// <summary>
+        /// Builds the My Classes and Completion Progress bottom cards by grouping the
+        /// already-loaded tasks DataTable by class in C#, avoiding a second database query.
+        /// </summary>
+        /// <param name="allTasks">The full task DataTable already loaded by LoadAllTasks.</param>
         private void BuildBottomCards(DataTable allTasks)
         {
             Dictionary<int, object[]> classMap = new Dictionary<int, object[]>();
@@ -211,12 +246,22 @@ namespace PACE
             rptProgress.DataBind();
         }
 
+        /// <summary>
+        /// Logs the student out and redirects to the login page.
+        /// </summary>
+        /// <param name="sender">The logout button raising the event.</param>
+        /// <param name="e">Event arguments (unused).</param>
         protected void btnLogout_Click(object sender, EventArgs e)
         {
             PaceUser.Logout();
             Response.Redirect("~/Login.aspx");
         }
 
+        /// <summary>
+        /// Builds the one or two letter initials shown in the avatar badge from the
+        /// logged-in student's full name.
+        /// </summary>
+        /// <returns>The student's initials in uppercase, or "?" if no name is available.</returns>
         protected string GetInitials()
         {
             string name = Session["FullName"] != null ? Session["FullName"].ToString() : "?";
@@ -225,6 +270,11 @@ namespace PACE
             return (parts[0].Substring(0, 1) + parts[parts.Length - 1].Substring(0, 1)).ToUpper();
         }
 
+        /// <summary>
+        /// Renders the priority badge markup for a task's PriorityLevel value.
+        /// </summary>
+        /// <param name="priorityObj">The PriorityLevel column value (1, 2, or 3).</param>
+        /// <returns>HTML markup for the matching priority badge.</returns>
         protected string GetPriorityBadge(object priorityObj)
         {
             int p = Convert.ToInt32(priorityObj);
@@ -233,6 +283,11 @@ namespace PACE
             return "<span class=\"badge badge-low\">Low</span>";
         }
 
+        /// <summary>
+        /// Renders the completion status badge markup for a task.
+        /// </summary>
+        /// <param name="markedCompleteObj">The MarkedComplete column value.</param>
+        /// <returns>HTML markup for the Complete or Pending badge.</returns>
         protected string GetStatusBadge(object markedCompleteObj)
         {
             return Convert.ToBoolean(markedCompleteObj)
@@ -240,6 +295,11 @@ namespace PACE
                 : "<span class=\"badge badge-pending\">Pending</span>";
         }
 
+        /// <summary>
+        /// Converts a task's due date into a human-readable urgency string relative to today.
+        /// </summary>
+        /// <param name="dueDateObj">The DueDate column value.</param>
+        /// <returns>A string such as "Overdue", "Due today", "Tomorrow", or "In N days".</returns>
         protected string GetUrgencyText(object dueDateObj)
         {
             int days = (Convert.ToDateTime(dueDateObj).Date - DateTime.Today).Days;
@@ -249,6 +309,11 @@ namespace PACE
             return "In " + days + " days";
         }
 
+        /// <summary>
+        /// Chooses the CSS class that colours a due date badge based on how soon it falls.
+        /// </summary>
+        /// <param name="dueDateObj">The DueDate column value.</param>
+        /// <returns>"due-red", "due-orange", or "due-green" depending on urgency.</returns>
         protected string GetUrgencyClass(object dueDateObj)
         {
             int days = (Convert.ToDateTime(dueDateObj).Date - DateTime.Today).Days;
