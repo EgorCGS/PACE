@@ -1,0 +1,25 @@
+/* Page-specific styles for Pages/Student/TaskDetail.aspx. Shared chrome
+   (sidebar, topbar, breadcrumb, page-subheader, card, shared badge colours)
+   lives in Site.css. */
+
+.content { padding:24px 28px 40px; max-width:760px; }
+
+.detail-header { padding:24px 28px 20px; border-bottom:1px solid var(--border); }
+.detail-title { font-size:22px; font-weight:700; color:var(--text-dark); margin-bottom:12px; }
+.detail-meta { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+/* This page's badge is slightly larger (gap, bigger padding/font) than the
+   shared Site.css .badge used elsewhere, so it keeps its own override here. */
+.badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:500; border:1px solid; white-space:nowrap; }
+.meta-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:500; background:rgba(74,111,165,0.10); color:#3a5a8c; border:1px solid #b8cde8; }
+.meta-pill i { font-size:13px; }
+
+.detail-body { padding:24px 28px; display:flex; flex-direction:column; gap:20px; }
+.field-label { font-size:11px; font-weight:600; letter-spacing:0.7px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+.field-value { font-size:14px; color:var(--text-dark); line-height:1.6; }
+.field-value.desc { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:14px 16px; line-height:1.7; }
+
+.detail-footer { padding:16px 28px; border-top:1px solid var(--border); background:#f8fbff; border-radius:0 0 12px 12px; }
+.btn-back { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:8px; background:var(--topbar); color:#fff; font-size:13.5px; font-weight:600; text-decoration:none; transition:background 0.15s; }
+.btn-back:hover { background:var(--hero-dark); }
+.not-found { padding:60px 28px; text-align:center; color:var(--text-muted); }

@@ -1,0 +1,70 @@
+/* Page-specific styles for Pages/Teacher/TeacherClassPage.aspx. Shared chrome
+   (sidebar, topbar, breadcrumb, hero, card, card-header-icon, shared badge
+   colours) lives in Site.css. */
+
+.content { padding:28px 28px 48px; display:flex; flex-direction:column; gap:28px; }
+.summary-strip { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.summary-card { background:var(--white); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); padding:22px 24px 20px; }
+.summary-number { font-size:36px; font-weight:700; color:var(--topbar); line-height:1; margin-bottom:8px; }
+.summary-label { font-size:12.5px; color:var(--text-muted); font-weight:500; }
+.actions-row { display:flex; gap:12px; }
+.btn-action { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:8px; background:var(--topbar); color:#fff; font-size:13.5px; font-weight:600; font-family:'DM Sans',sans-serif; border:none; cursor:pointer; text-decoration:none; transition:background 0.15s; }
+.btn-action:hover { background:var(--hero-dark); }
+.btn-action.secondary { background:var(--white); color:var(--topbar); border:1.5px solid var(--border); }
+.btn-action.secondary:hover { background:var(--bg); }
+.btn-action i { font-size:16px; }
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+
+/* This page's card-header uses a plain gap layout rather than the
+   justify-content:space-between + card-header-left variant CreateTask.aspx
+   uses, so it keeps its own copy rather than relying on a shared Site.css rule. */
+.card-header { display:flex; align-items:center; gap:10px; padding:16px 20px 14px; border-bottom:1px solid var(--border); }
+.card-header-title { font-size:15px; font-weight:600; flex:1; }
+
+.stats-table { width:100%; border-collapse:collapse; }
+.stats-table thead th { padding:10px 16px; text-align:left; font-size:11px; font-weight:600; letter-spacing:0.7px; text-transform:uppercase; color:var(--text-muted); background:var(--bg); border-bottom:1px solid var(--border); }
+.stats-table thead th:first-child { padding-left:20px; }
+.stats-table tbody tr { border-bottom:1px solid var(--border); transition:background 0.12s; }
+.stats-table tbody tr:last-child { border-bottom:none; }
+.stats-table tbody tr:hover { background:#f7f9fd; }
+.stats-table td { padding:12px 16px; vertical-align:middle; font-size:13.5px; }
+.stats-table td:first-child { padding-left:20px; font-weight:600; }
+.pct-cell { min-width:150px; }
+.pct-row { display:flex; align-items:center; gap:10px; }
+.pct-label { font-size:12.5px; font-weight:600; color:var(--text-dark); min-width:38px; text-align:right; }
+.pct-track { flex:1; height:7px; border-radius:10px; background:var(--bg); border:1px solid var(--border); overflow:hidden; }
+.pct-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--sidebar),var(--topbar)); }
+.pct-fill.green { background:linear-gradient(90deg,#2d8a5f,var(--green)); }
+.pct-fill.orange { background:linear-gradient(90deg,#b86e10,var(--orange)); }
+.pct-fill.zero { background:var(--border); }
+.fraction { font-size:12px; color:var(--text-muted); }
+.student-name-cell { display:flex; align-items:center; }
+.student-behind { color:var(--red); }
+.student-partial { color:var(--orange); }
+.student-complete { color:var(--green); }
+
+/* This page's empty-state uses a smaller padding plus an explicit font-size,
+   unlike the shared 48px Site.css version, so it keeps its own override. */
+.empty-state { padding:40px 20px; text-align:center; color:var(--text-muted); font-size:13px; }
+
+/* Student Distribution graph (stacked bar, green/orange/red buckets) */
+.graph-card-body { padding:20px; }
+.dist-bar { display:flex; width:100%; height:26px; border-radius:8px; overflow:hidden; border:1px solid var(--border); background:var(--bg); }
+.dist-seg { height:100%; transition:width 0.2s; }
+.dist-seg-green { background:linear-gradient(90deg,#2d8a5f,var(--green)); }
+.dist-seg-orange { background:linear-gradient(90deg,#b86e10,var(--orange)); }
+.dist-seg-red { background:linear-gradient(90deg,#b84040,var(--red)); }
+.dist-legend { display:flex; flex-wrap:wrap; gap:18px; margin-top:16px; }
+.dist-legend-item { display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-dark); }
+.dist-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.dist-dot-green { background:var(--green); }
+.dist-dot-orange { background:var(--orange); }
+.dist-dot-red { background:var(--red); }
+.dist-count { font-weight:700; }
+
+/* Completion Trend graph (bar per day, height proportional to completions) */
+.trend-chart-scroll { overflow-x:auto; }
+.trend-chart { display:flex; align-items:flex-end; gap:8px; height:140px; padding:10px 4px 0; min-width:100%; }
+.trend-bar-col { display:flex; flex-direction:column; align-items:center; flex:0 0 auto; width:26px; height:100%; justify-content:flex-end; }
+.trend-bar { width:16px; min-height:4px; border-radius:4px 4px 0 0; background:linear-gradient(180deg,var(--topbar),var(--sidebar)); }
+.trend-date-label { font-size:9.5px; color:var(--text-muted); margin-top:6px; white-space:nowrap; }

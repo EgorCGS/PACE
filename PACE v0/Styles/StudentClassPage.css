@@ -1,0 +1,20 @@
+/* Page-specific styles for Pages/Student/StudentClassPage.aspx. Shared chrome
+   (sidebar, topbar, breadcrumb, hero, filter bar/chip/search/sort, card,
+   card-header-icon, task-table base, badges, due colours, empty-state,
+   no-results) lives in Site.css. */
+
+.content { padding:24px 28px 40px; display:flex; flex-direction:column; gap:20px; }
+
+/* This page's card-header uses a plain gap layout rather than the
+   justify-content:space-between + card-header-left variant CreateTask.aspx
+   uses, so it keeps its own copy rather than relying on a shared Site.css rule. */
+.card-header { display:flex; align-items:center; gap:10px; padding:16px 20px 14px; border-bottom:1px solid var(--border); }
+.card-header-title { font-size:15px; font-weight:600; flex:1; }
+.card-header-count { font-size:13px; color:var(--text-muted); }
+
+/* Class progress stats card */
+.stats-body { padding:16px 20px 18px; display:flex; flex-direction:column; gap:16px; }
+.stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.stat-tile { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:12px 14px; text-align:center; }
+.stat-value { font-size:22px; font-weight:700; color:var(--text-dark); }
+.stat-label { font-size:11px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:var(--text-muted); margin-top:2px; }

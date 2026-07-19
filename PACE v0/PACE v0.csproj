@@ -81,6 +81,16 @@
     <Content Include="Pages\Teacher\TeacherClassPage.aspx" />
     <Content Include="Pages\Teacher\TeacherDashboard.aspx" />
     <Content Include="Setup.aspx" />
+    <Content Include="Styles\CreateTask.css" />
+    <Content Include="Styles\Login.css" />
+    <Content Include="Styles\ManageTasks.css" />
+    <Content Include="Styles\MarkCompletions.css" />
+    <Content Include="Styles\Site.css" />
+    <Content Include="Styles\StudentClassPage.css" />
+    <Content Include="Styles\StudentDashboard.css" />
+    <Content Include="Styles\TaskDetail.css" />
+    <Content Include="Styles\TeacherClassPage.css" />
+    <Content Include="Styles\TeacherDashboard.css" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,44 @@
+/* Page-specific styles for Pages/Teacher/ManageTasks.aspx. Shared chrome
+   (sidebar, topbar, breadcrumb, page-subheader, card, card-header-icon,
+   task-table, badges, btn-primary/btn-ghost) lives in Site.css. */
+
+.content { padding:24px 28px 40px; display:flex; flex-direction:column; gap:20px; }
+
+/* This page's card-header uses a plain gap layout rather than the
+   justify-content:space-between + card-header-left variant CreateTask.aspx
+   uses, so it keeps its own copy rather than relying on a shared Site.css rule. */
+.card-header { display:flex; align-items:center; gap:10px; padding:16px 20px 14px; border-bottom:1px solid var(--border); }
+.card-header-title { font-size:15px; font-weight:600; flex:1; }
+.edit-panel-title { font-size:13px; color:var(--text-muted); margin-left:4px; }
+
+.form-body { padding:20px; display:flex; flex-direction:column; gap:16px; }
+.form-label { font-size:12.5px; font-weight:600; }
+.form-input, .form-select, .form-textarea { width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; background:var(--input-bg); font-family:'DM Sans',sans-serif; font-size:13.5px; color:var(--text-dark); outline:none; transition:border-color 0.15s; }
+.form-select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a9fbe' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; padding-right:34px; }
+.form-textarea { resize:vertical; min-height:90px; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--topbar); background:#fff; }
+.form-footer { padding:14px 20px; border-top:1px solid var(--border); display:flex; align-items:center; gap:10px; background:#f8fbff; border-radius:0 0 12px 12px; }
+.error-msg { font-size:12px; color:var(--red); margin-top:2px; }
+
+.task-sub { font-size:12px; color:var(--text-muted); margin-top:1px; }
+.btn-edit { display:inline-flex; align-items:center; gap:4px; padding:5px 12px; border-radius:7px; background:#e8f0fa; color:#3a5a8c; font-size:12px; font-weight:500; font-family:'DM Sans',sans-serif; border:1px solid #b8cde8; cursor:pointer; text-decoration:none; transition:background 0.15s; }
+.btn-edit:hover { background:#cddcee; }
+.btn-delete { display:inline-flex; align-items:center; gap:4px; padding:5px 12px; border-radius:7px; background:var(--red-bg); color:var(--red); font-size:12px; font-weight:500; font-family:'DM Sans',sans-serif; border:1px solid var(--red-border); cursor:pointer; text-decoration:none; transition:background 0.15s; }
+.btn-delete:hover { background:#f8e0e0; }
+.actions-cell { display:flex; gap:6px; justify-content:flex-end; }
+
+.alert-success { background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:12px 16px; color:var(--green); font-size:13px; display:flex; align-items:center; gap:8px; }
+.alert-error { background:var(--red-bg); border:1px solid var(--red-border); border-radius:8px; padding:12px 16px; color:var(--red); font-size:13px; display:flex; align-items:center; gap:8px; }
+/* pnlSuccess and pnlError are both kept in the DOM at all times (not toggled with
+   server Visible) so the postback that first shows either one never inserts or
+   removes an element from the control tree, which is what actually broke
+   MaintainScrollPositionOnPostBack before this fix. Only ever one of the two is
+   shown at a time, so both sit in the same CSS grid cell (grid-area 1/1) rather than
+   stacking. The hidden state collapses to zero height (max-height:0, overflow:hidden)
+   instead of reserving the full alert box, so browsing the page normally does not
+   leave a permanent empty gap; the alert box's own height only appears at the moment
+   a save/delete genuinely produces a result, which is a small, expected, one-off
+   reflow tied directly to the action the teacher just took, not a page-load gap. */
+.alert-area { display:grid; }
+.alert-area > .alert-success-wrap, .alert-area > .alert-error-wrap { grid-area:1 / 1; }
+.alert-success-wrap.alert-hidden, .alert-error-wrap.alert-hidden { visibility:hidden; max-height:0; overflow:hidden; }

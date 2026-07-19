@@ -1,0 +1,149 @@
+/* PACE shared styles: design tokens plus layout/component rules used across
+   multiple pages. Page-specific rules live in Styles/<PageName>.css instead. */
+
+/* - CSS custom properties - */
+:root {
+    --bg:#ddeaf7; --sidebar:#4a6fa5; --topbar:#5b7db8; --hero-dark:#3a5a8c;
+    --text-dark:#1a2d42; --text-muted:#7a9fbe; --white:#ffffff; --border:#c5daf0;
+    --input-bg:#f0f5fb;
+    --red:#d95c5c; --red-bg:#fdf0f0; --red-border:#f0b8b8;
+    --orange:#d4882a; --orange-bg:#fef7ee; --orange-border:#f0d0a0;
+    --green:#3a9e6e; --green-bg:#eef8f3; --green-border:#a8d9c0;
+    --sidebar-w:258px; --topbar-h:58px; --filterbar-h:52px; --shadow:0 2px 8px rgba(74,111,165,0.10);
+}
+
+/* - Reset and base typography - */
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+a { text-decoration:none; }
+html, body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text-dark); font-size:14px; }
+
+/* - Sidebar - */
+.sidebar { position:fixed; left:0; top:0; bottom:0; width:var(--sidebar-w); background:var(--sidebar); display:flex; flex-direction:column; z-index:300; overflow-y:auto; }
+.sidebar-logo { padding:24px 20px 20px; border-bottom:1px solid rgba(255,255,255,0.12); }
+.logo-title { font-size:22px; font-weight:700; color:#fff; letter-spacing:-0.5px; }
+.logo-sub { font-size:11px; color:rgba(255,255,255,0.55); margin-top:2px; }
+.sidebar-nav { flex:1; padding:12px 0; }
+.nav-section-label { padding:14px 20px 5px; font-size:10.5px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; color:rgba(255,255,255,0.38); }
+.nav-item { display:flex; align-items:center; gap:10px; padding:9px 16px 9px 20px; margin:1px 8px; border-radius:8px; color:rgba(255,255,255,0.70); font-size:13.5px; text-decoration:none; transition:background 0.15s,color 0.15s; }
+.nav-item:hover { background:rgba(255,255,255,0.12); color:#fff; }
+.nav-item.active { background:rgba(255,255,255,0.18); color:#fff; font-weight:600; }
+.nav-item i { font-size:17px; flex-shrink:0; }
+.nav-item-label { flex:1; }
+/* Default badge: muted white pill */
+.nav-badge { font-size:11px; font-weight:700; background:rgba(255,255,255,0.22); color:#fff; padding:1px 7px; border-radius:20px; }
+/* Overdue badge: orange tint to signal urgency */
+.nav-badge.overdue { background:rgba(212,136,42,0.85); }
+.sidebar-user { padding:14px 16px; border-top:1px solid rgba(255,255,255,0.12); display:flex; align-items:center; gap:10px; }
+.user-avatar { width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.22); color:#fff; font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.user-info { flex:1; min-width:0; }
+.user-name { font-size:13px; font-weight:600; color:#fff; }
+.user-role { font-size:11px; color:rgba(255,255,255,0.50); }
+.btn-logout { background:none; border:none; color:rgba(255,255,255,0.45); cursor:pointer; padding:4px; border-radius:6px; transition:color 0.15s,background 0.15s; text-decoration:none; }
+.btn-logout:hover { color:#fff; background:rgba(255,255,255,0.12); }
+.btn-logout i { font-size:18px; display:block; }
+
+/* - Main column, topbar, breadcrumb - */
+.main { margin-left:var(--sidebar-w); min-height:100vh; display:flex; flex-direction:column; }
+.topbar { position:sticky; top:0; z-index:200; height:var(--topbar-h); background:var(--topbar); display:flex; align-items:center; padding:0 28px; box-shadow:0 2px 10px rgba(58,90,140,0.18); }
+.breadcrumb { display:flex; align-items:center; gap:6px; font-size:13px; color:rgba(255,255,255,0.65); }
+.breadcrumb a { color:rgba(255,255,255,0.65); }
+.breadcrumb .sep { opacity:0.45; font-size:12px; }
+.breadcrumb .current { color:#fff; font-weight:500; }
+
+/* - Hero gradient strip (dashboard and class overview pages only) - */
+.hero { background:linear-gradient(130deg,var(--hero-dark) 0%,var(--topbar) 100%); padding:30px 28px 28px; }
+.hero-title { font-size:28px; font-weight:700; color:#fff; letter-spacing:-0.5px; }
+.hero-sub { font-size:14px; color:rgba(255,255,255,0.62); margin-top:4px; }
+
+/* - Compact page subheader (action pages, replaces the hero) - */
+.page-subheader { background:var(--white); border-bottom:1px solid var(--border); padding:16px 28px; display:flex; align-items:center; gap:14px; }
+.page-subheader-icon { width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:21px; flex-shrink:0; }
+.page-subheader-title { font-size:18px; font-weight:700; color:var(--text-dark); line-height:1.2; }
+.page-subheader-sub { font-size:12.5px; color:var(--text-muted); margin-top:2px; }
+
+/* - Cards - */
+.card { background:var(--white); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); }
+.card-header-icon { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+/* - Badges - */
+.badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:20px; font-size:11.5px; font-weight:500; border:1px solid; white-space:nowrap; }
+.badge-high { color:var(--red); background:var(--red-bg); border-color:var(--red-border); }
+.badge-med { color:var(--orange); background:var(--orange-bg); border-color:var(--orange-border); }
+.badge-low { color:var(--green); background:var(--green-bg); border-color:var(--green-border); }
+.badge-complete { color:var(--green); background:var(--green-bg); border-color:var(--green-border); }
+.badge-pending { color:var(--orange); background:var(--orange-bg); border-color:var(--orange-border); }
+
+/* - Buttons - */
+.btn-view { display:inline-flex; align-items:center; gap:4px; padding:5px 12px; border-radius:7px; background:var(--topbar); color:#fff; font-size:12px; font-weight:500; text-decoration:none; transition:background 0.15s; }
+.btn-view:hover { background:var(--hero-dark); }
+.btn-view i { font-size:14px; }
+.btn-primary { display:inline-flex; align-items:center; gap:6px; padding:9px 20px; border-radius:8px; background:var(--topbar); color:#fff; font-size:13.5px; font-weight:600; font-family:'DM Sans',sans-serif; border:none; cursor:pointer; text-decoration:none; transition:background 0.15s; }
+.btn-primary:hover { background:var(--hero-dark); }
+.btn-ghost { display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border-radius:8px; background:transparent; color:var(--text-muted); font-size:13.5px; font-weight:500; font-family:'DM Sans',sans-serif; border:1.5px solid var(--border); cursor:pointer; text-decoration:none; transition:all 0.15s; }
+.btn-ghost:hover { background:var(--bg); color:var(--text-dark); }
+
+/* - Task table shared base (row zebra/hover/border and common cell padding) - */
+.table-card { overflow:hidden; }
+.task-table { width:100%; border-collapse:collapse; }
+.task-table thead th { padding:11px 14px; text-align:left; font-size:11px; font-weight:600; letter-spacing:0.7px; text-transform:uppercase; color:var(--text-muted); background:var(--bg); border-bottom:1px solid var(--border); }
+.task-table thead th:first-child { padding-left:18px; }
+.task-table tbody tr { border-bottom:1px solid var(--border); transition:background 0.12s; }
+.task-table tbody tr:last-child { border-bottom:none; }
+.task-table tbody tr:nth-child(even) { background:#f7f9fd; }
+.task-table tbody tr:hover { background:#eef3fb; }
+.task-table td { padding:11px 14px; vertical-align:middle; }
+.task-table td:first-child { padding-left:18px; }
+.task-name { font-size:13.5px; font-weight:600; }
+.task-desc { font-size:12px; color:var(--text-muted); margin-top:2px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.student-name-cell { display:flex; align-items:center; }
+.student-avatar { width:30px; height:30px; border-radius:50%; background:rgba(74,111,165,0.12); color:#3a5a8c; font-size:11.5px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; border:1px solid #b8cde8; margin-right:8px; }
+
+/* - Sticky filter bar (task list pages: search, sort, filter chips) - */
+.filter-bar { position:sticky; top:var(--topbar-h); z-index:150; background:var(--white); border-bottom:1px solid var(--border); box-shadow:0 2px 8px rgba(74,111,165,0.08); padding:0 28px; height:var(--filterbar-h); display:flex; align-items:center; gap:10px; }
+.filter-chips { display:flex; gap:6px; flex:1; }
+/* appearance:none strips native button chrome, which otherwise renders with its own
+   box metrics (line-height, internal insets) layered on top of this padding, the same
+   issue .sort-select below is already reset for. line-height:1 then makes the chip's
+   vertical size fully determined by padding, not by an inherited or native line-height. */
+.chip { padding:5px 14px; border-radius:20px; font-size:13px; font-weight:500; line-height:1; cursor:pointer; border:1.5px solid var(--border); color:var(--text-muted); background:#fff; appearance:none; -webkit-appearance:none; transition:all 0.15s; user-select:none; font-family:'DM Sans',sans-serif; }
+.chip:hover { border-color:var(--topbar); color:var(--topbar); }
+/* Active state uses background/border/color only, not font-weight, so the chip's
+   rendered text width never changes on toggle. A 500->600 weight swap on DM Sans
+   widens the glyphs enough to shift the whole flex row on activation. */
+.chip.active { background:var(--topbar); border-color:var(--topbar); color:#fff; }
+.filter-right { display:flex; align-items:center; gap:8px; }
+.search-wrap { position:relative; display:flex; align-items:center; }
+.search-wrap i { position:absolute; left:10px; color:var(--text-muted); font-size:15px; pointer-events:none; }
+.search-input { padding:6px 12px 6px 32px; border-radius:8px; border:1.5px solid var(--border); background:var(--bg); font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text-dark); width:200px; outline:none; transition:border-color 0.15s; }
+.search-input:focus { border-color:var(--topbar); background:#fff; }
+.search-input::placeholder { color:var(--text-muted); }
+/* Fixed width, not auto: a native <select> otherwise resizes to fit whichever
+   option is currently selected, which would shift the search box to its left
+   since .filter-chips (flex:1) absorbs whatever width .filter-right does not use. */
+.sort-select { width:148px; padding:6px 28px 6px 10px; border-radius:8px; border:1.5px solid var(--border); background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237a9fbe' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 8px center; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--text-dark); outline:none; appearance:none; cursor:pointer; transition:border-color 0.15s; }
+.sort-select:focus { border-color:var(--topbar); }
+/* min-width reserves space for the longest realistic count text ("23 of 24 tasks")
+   so filtering/searching does not resize .filter-right and shift the search box,
+   which sits to its left inside the same flex row. */
+.filter-count { font-size:12.5px; color:var(--text-muted); white-space:nowrap; min-width:100px; text-align:right; }
+
+/* - Progress bar (student dashboard and class page "Completion Progress" panels) - */
+.progress-label-row { display:flex; justify-content:space-between; margin-bottom:4px; font-size:13px; }
+.progress-subj { font-weight:500; }
+.progress-pct { font-weight:600; color:var(--text-muted); }
+.progress-track { height:7px; border-radius:10px; background:var(--bg); border:1px solid var(--border); overflow:hidden; }
+.progress-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--sidebar),var(--topbar)); }
+.progress-fill.green { background:linear-gradient(90deg,#2d8a5f,var(--green)); }
+.progress-fill.orange { background:linear-gradient(90deg,#b86e10,var(--orange)); }
+.progress-fill.zero { background:var(--border); }
+
+/* - Due date urgency text colours - */
+.due-main { font-size:13px; font-weight:500; }
+.due-urgency { font-size:11px; font-weight:500; margin-top:1px; }
+.due-red { color:var(--red); } .due-orange { color:var(--orange); } .due-green { color:var(--green); }
+
+/* - Misc shared - */
+.no-results { padding:36px 20px; text-align:center; color:var(--text-muted); font-size:13.5px; }
+.empty-state { padding:48px 20px; text-align:center; color:var(--text-muted); }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.form-group { display:flex; flex-direction:column; gap:5px; }

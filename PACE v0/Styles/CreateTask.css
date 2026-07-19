@@ -1,0 +1,67 @@
+/* Page-specific styles for Pages/Teacher/CreateTask.aspx. Shared chrome
+   (sidebar, topbar, breadcrumb, page-subheader, card, card-header-icon,
+   task-table, form-row/form-group) lives in Site.css. */
+
+.content { padding:24px 28px 40px; }
+.content-layout { display:flex; gap:20px; align-items:flex-start; }
+.form-column { flex:1; min-width:0; }
+.panel-column { width:290px; flex-shrink:0; display:flex; flex-direction:column; gap:16px; }
+
+/* This page's card header uses justify-content:space-between plus a
+   card-header-left wrapper (for the "required fields" note on the right),
+   unlike the plain gap layout other pages' card-header uses, so it keeps
+   its own copy rather than relying on the shared Site.css rule. */
+.card-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px 14px; border-bottom:1px solid var(--border); }
+.card-header-left { display:flex; align-items:center; gap:10px; }
+.card-header-title { font-size:15px; font-weight:600; }
+.required-note { font-size:12px; color:var(--text-muted); font-style:italic; }
+.required-note span { color:var(--red); font-style:normal; }
+
+.form-body { padding:20px; display:flex; flex-direction:column; gap:18px; }
+.form-label { font-size:12.5px; font-weight:600; color:var(--text-dark); }
+.form-label .req { color:var(--red); margin-left:2px; }
+.form-hint { font-size:11.5px; color:var(--text-muted); }
+
+.form-select, .form-input { width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; background:var(--input-bg); font-family:'DM Sans',sans-serif; font-size:13.5px; color:var(--text-dark); outline:none; transition:border-color 0.15s,box-shadow 0.15s; appearance:none; }
+.form-select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237a9fbe' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; padding-right:34px; }
+.form-select:focus, .form-input:focus { border-color:var(--topbar); box-shadow:0 0 0 3px rgba(91,125,184,0.14); background:#fff; }
+.form-input::placeholder { color:var(--text-muted); }
+.form-input.error { border-color:var(--red); background:var(--red-bg); }
+.form-textarea { width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; background:var(--input-bg); font-family:'DM Sans',sans-serif; font-size:13.5px; color:var(--text-dark); outline:none; resize:vertical; min-height:100px; transition:border-color 0.15s,box-shadow 0.15s; }
+.form-textarea:focus { border-color:var(--topbar); box-shadow:0 0 0 3px rgba(91,125,184,0.14); background:#fff; }
+
+.error-msg { font-size:12px; color:var(--red); font-weight:500; margin-top:2px; }
+
+.priority-toggle { display:grid; grid-template-columns:1fr 1fr 1fr; border:1.5px solid var(--border); border-radius:8px; overflow:hidden; }
+.prio-btn { padding:9px 0; text-align:center; font-size:13px; font-weight:500; cursor:pointer; background:var(--input-bg); color:var(--text-muted); border:none; border-right:1px solid var(--border); font-family:'DM Sans',sans-serif; transition:background 0.15s,color 0.15s; }
+.prio-btn:last-child { border-right:none; }
+.prio-btn:hover { background:#e4edf9; color:var(--text-dark); }
+.prio-btn.sel-high { background:var(--red-bg); color:var(--red); font-weight:700; }
+.prio-btn.sel-med { background:var(--orange-bg); color:var(--orange); font-weight:700; }
+.prio-btn.sel-low { background:var(--green-bg); color:var(--green); font-weight:700; }
+
+.form-footer { padding:14px 20px; border-top:1px solid var(--border); display:flex; align-items:center; gap:10px; background:#f8fbff; border-radius:0 0 12px 12px; }
+
+.alert-success { background:var(--green-bg); border:1px solid var(--green-border); border-radius:8px; padding:12px 16px; color:var(--green); margin-bottom:16px; font-size:13px; display:flex; align-items:center; gap:8px; }
+/* Kept in the DOM at all times (not toggled with server Visible) so the postback
+   that first shows it never inserts or removes an element from the control tree,
+   which is what actually broke MaintainScrollPositionOnPostBack before this fix.
+   The hidden state collapses to zero height (max-height:0, overflow:hidden) rather
+   than reserving the full alert box, so the form does not carry a permanent empty
+   gap above it; the alert's height only appears at the moment a task is actually
+   created, a small, one-off reflow tied directly to the teacher's own action. */
+.alert-success-wrap.alert-hidden { visibility:hidden; max-height:0; overflow:hidden; }
+
+.panel-card-header { display:flex; align-items:center; gap:9px; padding:14px 16px 12px; border-bottom:1px solid var(--border); }
+.panel-card-icon { width:30px; height:30px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.panel-card-title { font-size:13.5px; font-weight:600; }
+.val-list { padding:10px 16px 14px; display:flex; flex-direction:column; gap:10px; }
+.val-rule { display:flex; gap:10px; align-items:flex-start; }
+.val-rule-text { font-size:12.5px; color:var(--text-dark); line-height:1.45; }
+
+/* This page's badge adds flex-shrink:0 on top of the shared Site.css
+   version, so it keeps its own override. */
+.badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:20px; font-size:11.5px; font-weight:500; border:1px solid; white-space:nowrap; flex-shrink:0; }
+.badge-existence { color:#3a5a8c; background:#e8f0fa; border-color:#b8cde8; }
+.badge-type { color:#6b3db0; background:#f1ecfa; border-color:#cdb0e8; }
+.badge-range { color:var(--green); background:var(--green-bg); border-color:var(--green-border); }
