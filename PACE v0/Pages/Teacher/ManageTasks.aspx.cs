@@ -239,12 +239,43 @@ namespace PACE
             // on, so the same completeness standard used on creation applies to edits.
             // Existence checks on each field
             if (string.IsNullOrWhiteSpace(title)) { lblEditTitleError.Visible = true; isValid = false; }
+            // Range check on title length, matching HomeworkTasks.Title (nvarchar(150)).
+            // The client-side MaxLength on txtEditTitle enforces the same limit, but only
+            // limits typing in a browser, it cannot stop an oversized value reaching this
+            // handler through a bypassed or hand-crafted request, which would otherwise
+            // reach PaceTask.Edit() and throw an unhandled SqlException from SQL Server's
+            // own truncation rule instead of this field's own error message.
+            else if (title.Length > 150)
+            {
+                lblEditTitleError.Text = "Title cannot exceed 150 characters.";
+                lblEditTitleError.Visible = true;
+                isValid = false;
+            }
             else { lblEditTitleError.Visible = false; }
 
             if (string.IsNullOrWhiteSpace(subject)) { lblEditSubjectError.Visible = true; isValid = false; }
+            // Range check on subject length, matching HomeworkTasks.Subject
+            // (nvarchar(100)) for the same reason as the title check above.
+            else if (subject.Length > 100)
+            {
+                lblEditSubjectError.Text = "Subject cannot exceed 100 characters.";
+                lblEditSubjectError.Visible = true;
+                isValid = false;
+            }
             else { lblEditSubjectError.Visible = false; }
 
             if (string.IsNullOrWhiteSpace(description)) { lblEditDescError.Visible = true; isValid = false; }
+            // Range check on description length, matching HomeworkTasks.Description
+            // (nvarchar(1000)) for the same reason as the title and subject checks
+            // above. This field's textarea previously had no client-side MaxLength at
+            // all, so this was the only barrier standing between a long edited
+            // description and an unhandled SqlException.
+            else if (description.Length > 1000)
+            {
+                lblEditDescError.Text = "Description cannot exceed 1000 characters.";
+                lblEditDescError.Visible = true;
+                isValid = false;
+            }
             else { lblEditDescError.Visible = false; }
 
             // Type check on due date

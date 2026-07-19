@@ -211,7 +211,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Description <span class="req">*</span></label>
-                                    <asp:TextBox ID="txtDescription" runat="server" TextMode="MultiLine" CssClass="form-textarea" placeholder="Describe the task in detail..." />
+                                    <asp:TextBox ID="txtDescription" runat="server" TextMode="MultiLine" CssClass="form-textarea" placeholder="Describe the task in detail..." MaxLength="1000" />
                                     <asp:Label ID="lblDescError" runat="server" CssClass="error-msg" Visible="false">Description is required.</asp:Label>
                                 </div>
                                 <div class="form-row">

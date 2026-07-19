@@ -120,6 +120,20 @@ namespace PACE
                 txtTitle.CssClass = "form-input error";
                 isValid = false;
             }
+            // Range check on title length. The TextBox's client-side MaxLength of 150
+            // matches HomeworkTasks.Title (nvarchar(150)), but MaxLength only limits
+            // typing in a browser, it does not stop an oversized value reaching this
+            // handler through a bypassed or hand-crafted request. Without this check,
+            // an over-limit title would reach PaceTask.Create() and throw an unhandled
+            // SqlException from SQL Server's own truncation rule, instead of the
+            // field-specific message a teacher gets from every other check on this form.
+            else if (title.Length > 150)
+            {
+                lblTitleError.Text = "Title cannot exceed 150 characters.";
+                lblTitleError.Visible = true;
+                txtTitle.CssClass = "form-input error";
+                isValid = false;
+            }
             else { lblTitleError.Visible = false; txtTitle.CssClass = "form-input"; }
 
             // Existence check on subject
@@ -129,11 +143,31 @@ namespace PACE
                 txtSubject.CssClass = "form-input error";
                 isValid = false;
             }
+            // Range check on subject length, matching HomeworkTasks.Subject
+            // (nvarchar(100)) for the same reason as the title check above.
+            else if (subject.Length > 100)
+            {
+                lblSubjectError.Text = "Subject cannot exceed 100 characters.";
+                lblSubjectError.Visible = true;
+                txtSubject.CssClass = "form-input error";
+                isValid = false;
+            }
             else { lblSubjectError.Visible = false; txtSubject.CssClass = "form-input"; }
 
             // Existence check on description
             if (string.IsNullOrWhiteSpace(description))
             {
+                lblDescError.Visible = true;
+                isValid = false;
+            }
+            // Range check on description length, matching HomeworkTasks.Description
+            // (nvarchar(1000)) for the same reason as the title and subject checks
+            // above. This field's textarea has no visible character counter, so a
+            // teacher pasting in a long set of instructions is the most likely of the
+            // three fields to hit this without ever seeing it coming from the UI.
+            else if (description.Length > 1000)
+            {
+                lblDescError.Text = "Description cannot exceed 1000 characters.";
                 lblDescError.Visible = true;
                 isValid = false;
             }

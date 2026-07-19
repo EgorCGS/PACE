@@ -207,7 +207,7 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Description</label>
-                                <asp:TextBox ID="txtEditDescription" runat="server" TextMode="MultiLine" CssClass="form-textarea" />
+                                <asp:TextBox ID="txtEditDescription" runat="server" TextMode="MultiLine" CssClass="form-textarea" MaxLength="1000" />
                                 <asp:Label ID="lblEditDescError" runat="server" CssClass="error-msg" Visible="false">Description is required.</asp:Label>
                             </div>
                             <div class="form-row">
